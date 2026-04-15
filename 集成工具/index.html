@@ -555,6 +555,126 @@ input, button, select, textarea { font-family: inherit; }
 }
 
 /* ============================================================
+   承兑工具 — 对比表格
+   ============================================================ */
+.compare-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+.compare-table th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 10px 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+}
+.compare-table th:first-child { text-align: left; }
+.compare-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-mid);
+    text-align: center;
+    vertical-align: middle;
+}
+.compare-table td:first-child { text-align: left; font-weight: 500; color: var(--ink); }
+.compare-table tr:hover td { background: #fdfcf8; }
+.compare-table .input-cell { padding: 6px 8px; }
+.compare-table .input-cell input,
+.compare-table .input-cell select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    background: var(--white);
+    transition: border-color .2s;
+}
+.compare-table .input-cell input:focus,
+.compare-table .input-cell select:focus { border-color: var(--gold); }
+.compare-table .input-cell .input-row { gap: 4px; }
+
+/* 方案输入区（按计划启用的区块皮肤类） */
+.scheme-inputs .card-title { margin-bottom: 12px; }
+.scheme-inputs .compare-table th { background: var(--navy-light); }
+.scheme-inputs .compare-table td { padding-top: 9px; padding-bottom: 9px; }
+.scheme-inputs .compare-table .input-cell input,
+.scheme-inputs .compare-table .input-cell select { background: #fffdf8; }
+
+/* 分析结果网格 */
+.analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.analysis-item {
+    padding: 14px 16px;
+    background: #fafaf6;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+.analysis-item-label { font-size: 12px; color: var(--ink-light); margin-bottom: 6px; }
+.analysis-item-value { font-size: 18px; font-weight: 600; color: var(--ink); }
+
+/* 差异颜色 */
+.diff-positive { color: var(--success); font-weight: 600; }
+.diff-negative { color: var(--danger); font-weight: 600; }
+
+/* 只读指标 */
+.readonly-metric {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #f5f5f0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--ink-mid);
+    font-weight: 500;
+}
+
+/* 收益摘要 Hero（定期方案） */
+.ft-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(13,27,42,.03), rgba(201,168,76,.06));
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.ft-summary-item { text-align: center; flex: 1; min-width: 120px; }
+.ft-summary-label { font-size: 12px; color: var(--ink-light); margin-bottom: 4px; }
+.ft-summary-value { font-size: 22px; font-weight: 700; color: var(--gold); }
+.ft-summary-diff { font-size: 22px; font-weight: 700; }
+
+/* 审批提示 */
+.approval-hint {
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: none;
+}
+.approval-hint.show { display: block; }
+.approval-hint-team { background: #edf7f0; border: 1px solid #a3d9b1; color: var(--success); }
+.approval-hint-leader { background: #fdf8e8; border: 1px solid var(--gold-light); color: var(--warning); }
+.approval-hint-exceed { background: #fdf0ef; border: 1px solid #f5c6c2; color: var(--danger); }
+
+/* 输入轻提示（弱提示，不打断输入） */
+.soft-hint {
+    display: none;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    border: 1px solid #e6e3d9;
+    background: #fbfaf6;
+    color: var(--ink-light);
+}
+.soft-hint.show { display: block; }
+.soft-hint.warn {
+    border-color: #f1d7a5;
+    background: #fdf8e8;
+    color: var(--warning);
+}
+
+/* ============================================================
    打印样式
    ============================================================ */
 @media print {
@@ -659,6 +779,12 @@ input, button, select, textarea { font-family: inherit; }
             </div>
             <div class="nav-item" data-page="page-price" onclick="UI.switchPage('page-price', this)">
                 <span class="nav-icon">&#9670;</span>一户一策调价计算器
+            </div>
+            <div class="nav-item" data-page="page-fixed-term" onclick="UI.switchPage('page-fixed-term', this)">
+                <span class="nav-icon">&#9670;</span>承兑-定期方案测算
+            </div>
+            <div class="nav-item" data-page="page-breakeven" onclick="UI.switchPage('page-breakeven', this)">
+                <span class="nav-icon">&#9670;</span>承兑-收益打平测算
             </div>
             <div class="nav-item nav-admin-only" data-page="page-config" onclick="UI.switchPage('page-config', this)">
                 <span class="nav-icon">&#9881;</span>参数配置
@@ -805,14 +931,239 @@ input, button, select, textarea { font-family: inherit; }
             </div>
         </div>
 
-        <!-- ====== 内容区 3：参数配置中心（仅管理员） ====== -->
-        <div class="content-page" id="page-config">
+        <!-- ====== 内容区 3：承兑-定期方案测算 ====== -->
+        <div class="content-page" id="page-fixed-term">
+            <div class="page-header-bar">
+                <div class="page-title">承兑-定期方案测算</div>
+                <button class="btn btn-outline" id="exportFixedTermPdfBtn" style="display:none;" onclick="ExportFixedTerm.printPDF()">导出 PDF</button>
+            </div>
+            <!-- 收益摘要 -->
+            <div class="ft-summary-bar" id="ft-summary" style="display:none;">
+                <div class="ft-summary-item">
+                    <div class="ft-summary-label">方案B单票收益</div>
+                    <div class="ft-summary-value" id="ft-rev-b">--</div>
+                </div>
+                <div style="color:var(--border);font-size:24px;align-self:center;">|</div>
+                <div class="ft-summary-item">
+                    <div class="ft-summary-label">方案A单票收益</div>
+                    <div class="ft-summary-value" id="ft-rev-a">--</div>
+                </div>
+                <div style="color:var(--border);font-size:24px;align-self:center;">|</div>
+                <div class="ft-summary-item">
+                    <div class="ft-summary-label">收益差异 (B-A)</div>
+                    <div class="ft-summary-diff" id="ft-rev-diff">--</div>
+                </div>
+            </div>
+            <!-- 对比表格 -->
+            <div class="card scheme-inputs">
+                <div class="card-title">方案对比输入</div>
+                <div class="soft-hint" id="ft-softHint"></div>
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th style="width:200px;">字段</th>
+                            <th>目标方案 B</th>
+                            <th>目标方案 A</th>
+                            <th style="width:140px;">差异 (B-A)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>目标保证金比例</td>
+                            <td class="input-cell">
+                                <div class="input-row">
+                                    <input type="number" id="ft-ratioB" placeholder="如：80" step="1" min="0" max="100" oninput="ToolFixedTerm.recalc()">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </td>
+                            <td class="input-cell">
+                                <div class="input-row">
+                                    <input type="number" id="ft-ratioA" placeholder="如：98" step="1" min="0" max="100" oninput="ToolFixedTerm.recalc()">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>活期/定期</td>
+                            <td class="input-cell">
+                                <select id="ft-depositB" onchange="ToolFixedTerm.recalc()">
+                                    <option value="活期">活期</option>
+                                    <option value="3个月定期">3个月定期</option>
+                                    <option value="6个月定期">6个月定期</option>
+                                </select>
+                            </td>
+                            <td class="input-cell">
+                                <select id="ft-depositA" onchange="ToolFixedTerm.recalc()">
+                                    <option value="活期">活期</option>
+                                    <option value="3个月定期">3个月定期</option>
+                                    <option value="6个月定期" selected>6个月定期</option>
+                                </select>
+                            </td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>开票周期 (月)</td>
+                            <td class="input-cell">
+                                <input type="number" id="ft-cycleB" placeholder="如：6" step="1" min="1" max="12" oninput="ToolFixedTerm.recalc()">
+                            </td>
+                            <td class="input-cell">
+                                <input type="number" id="ft-cycleA" placeholder="如：6" step="1" min="1" max="12" oninput="ToolFixedTerm.recalc()">
+                            </td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>开票金额 (万)</td>
+                            <td class="input-cell">
+                                <input type="number" id="ft-amountB" placeholder="如：2100" step="1" min="0" oninput="ToolFixedTerm.recalc()">
+                            </td>
+                            <td class="input-cell">
+                                <input type="number" id="ft-amountA" placeholder="如：1000" step="1" min="0" oninput="ToolFixedTerm.recalc()">
+                            </td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>最低贷款定价</td>
+                            <td><span class="readonly-metric" id="ft-minPriceB">--</span></td>
+                            <td><span class="readonly-metric" id="ft-minPriceA">--</span></td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>保证金净FTP收益率</td>
+                            <td><span class="readonly-metric" id="ft-spreadB">--</span></td>
+                            <td><span class="readonly-metric" id="ft-spreadA">--</span></td>
+                            <td>--</td>
+                        </tr>
+                        <tr>
+                            <td>单票收益 (万)</td>
+                            <td><span class="readonly-metric" id="ft-revenueB">--</span></td>
+                            <td><span class="readonly-metric" id="ft-revenueA">--</span></td>
+                            <td><span id="ft-revenueDiff">--</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分析结果 -->
+            <div class="card" id="ft-analysis-card" style="display:none;">
+                <div class="card-title">绝对收益分析</div>
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <div class="analysis-item-label">保证金比例不变，达到方案A收益的开票金额</div>
+                        <div class="analysis-item-value" id="ft-beAmount">--</div>
+                    </div>
+                    <div class="analysis-item">
+                        <div class="analysis-item-label">开票金额不变，达到方案A收益的保证金比例</div>
+                        <div class="analysis-item-value" id="ft-beRatio">--</div>
+                    </div>
+                </div>
+                <div class="approval-hint approval-hint-team" id="ft-hint-team"></div>
+                <div class="approval-hint approval-hint-leader" id="ft-hint-leader"></div>
+                <div class="approval-hint approval-hint-exceed" id="ft-hint-exceed"></div>
+            </div>
+            <!-- 图表 -->
+            <div class="card" id="ft-chart-card" style="display:none;">
+                <div class="card-title">保证金比例-收益曲线（相对方案A）</div>
+                <div class="chart-wrap"><canvas id="ft-chart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ====== 内容区 4：承兑-收益打平测算 ====== -->
+        <div class="content-page" id="page-breakeven">
+            <div class="page-header-bar">
+                <div class="page-title">承兑-收益打平测算</div>
+                <button class="btn btn-outline" id="exportBreakevenPdfBtn" style="display:none;" onclick="ExportBreakeven.printPDF()">导出 PDF</button>
+            </div>
+            <div class="two-col">
+                <!-- 左侧输入 -->
+                <div class="card">
+                    <div class="card-title">计算参数</div>
+                    <div class="soft-hint" id="be-softHint"></div>
+                    <div class="form-group">
+                        <label class="form-label">当前生效保证金比例</label>
+                        <div class="input-row">
+                            <input type="number" class="form-input" id="be-currentRatio" placeholder="如：50" step="1" min="0" max="100" oninput="ToolBreakeven.recalc()">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">当前生效保证金比例对应价格</label>
+                        <div class="readonly-metric" id="be-currentPrice" style="display:block;padding:10px 12px;width:100%;">--</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">过去三个月均敞口金额 (万)</label>
+                        <input type="number" class="form-input" id="be-avgExposure" placeholder="如：100" step="1" min="0" oninput="ToolBreakeven.recalc()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">过去三个月均保证金金额 (万)</label>
+                        <input type="number" class="form-input" id="be-avgMargin" placeholder="如：300" step="1" min="0" oninput="ToolBreakeven.recalc()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">过去三个月贷款日均额占</label>
+                        <div class="input-row">
+                            <input type="number" class="form-input" id="be-loanRatio" placeholder="如：75" step="1" min="0" max="100" oninput="ToolBreakeven.recalc()">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标保证金比例</label>
+                        <div class="input-row">
+                            <input type="number" class="form-input" id="be-targetRatio" placeholder="如：65" step="1" min="0" max="100" oninput="ToolBreakeven.recalc()">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">活期/定期</label>
+                        <select class="form-select" id="be-depositType" onchange="ToolBreakeven.recalc()">
+                            <option value="活期">活期</option>
+                            <option value="3个月定期">3个月定期</option>
+                            <option value="6个月定期">6个月定期</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 右侧结果 -->
+                <div class="card">
+                    <div class="card-title">计算结果</div>
+                    <div class="result-empty" id="be-empty">
+                        <div class="result-empty-icon">&#9670;</div>
+                        <div>请在左侧输入参数</div>
+                    </div>
+                    <div class="result-display" id="be-result">
+                        <div class="result-hero">
+                            <div class="result-hero-label">未来三个月均开票金额</div>
+                            <div class="result-hero-value" id="be-futureAmount">--</div>
+                            <div class="result-hero-unit">万元</div>
+                        </div>
+                        <div class="result-pair">
+                            <div class="result-medium">
+                                <div class="result-medium-label">需提升开票金额</div>
+                                <div class="result-medium-value" id="be-increase">--</div>
+                            </div>
+                            <div class="result-medium">
+                                <div class="result-medium-label">保证金净FTP收益率</div>
+                                <div class="result-medium-value" id="be-spread">--</div>
+                            </div>
+                        </div>
+                        <div class="detail-list">
+                            <div class="detail-row"><span class="detail-row-label">当前保证金比例</span><span class="detail-row-value" id="be-d-currentRatio">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">当前对应价格</span><span class="detail-row-value" id="be-d-currentPrice">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">目标保证金比例</span><span class="detail-row-value" id="be-d-targetRatio">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">历史均敞口</span><span class="detail-row-value" id="be-d-exposure">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">历史均保证金</span><span class="detail-row-value" id="be-d-margin">--</span></div>
+                        </div>
+                        <div class="chart-wrap"><canvas id="be-chart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== 内容区 5：参数配置中心（仅管理员） ====== -->        <div class="content-page" id="page-config">
             <div class="page-header-bar">
                 <div class="page-title">参数配置中心</div>
             </div>
             <div class="config-tabs">
                 <div class="config-tab active" onclick="ConfigPanel.switchTab('cfg-ftp', this)">FTP 配置</div>
                 <div class="config-tab" onclick="ConfigPanel.switchTab('cfg-price', this)">调价参数</div>
+                <div class="config-tab" onclick="ConfigPanel.switchTab('cfg-chengdui', this)">承兑参数</div>
             </div>
 
             <!-- FTP 配置面板 -->
@@ -860,8 +1211,7 @@ input, button, select, textarea { font-family: inherit; }
             </div>
 
             <!-- 调价参数配置面板 -->
-            <div class="config-panel" id="cfg-price">
-                <div class="card">
+            <div class="config-panel" id="cfg-price">                <div class="card">
                     <div class="alert-success" id="pa-cfg-success">保存成功！调价参数已更新</div>
                     <div class="card-title">调价参数配置</div>
                     <form id="priceAdjustForm" onsubmit="ConfigPanel.savePriceAdjust(event)">
@@ -917,6 +1267,102 @@ input, button, select, textarea { font-family: inherit; }
                         <table class="history-table">
                             <thead><tr><th>生效日期</th><th>业务成本</th><th>利润点</th><th>520兜底</th><th>非520下限</th><th>状态</th><th>备注</th><th>操作时间</th><th>操作</th></tr></thead>
                             <tbody id="pa-history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 承兑参数配置面板 -->
+            <div class="config-panel" id="cfg-chengdui">
+                <div class="card">
+                    <div class="alert-success" id="chengdui-success">保存成功！承兑参数已更新</div>
+                    <div class="card-title">基础 FTP 参数</div>
+                    <form id="chengduiForm" onsubmit="ConfigPanel.saveChengdui(event)">
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 保证金FTP收入</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-ftpIncome" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 保证金FTP活期支出</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-ftpDemand" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 保证金FTP3个月定期支出</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-ftp3m" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 保证金FTP6个月定期支出</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-ftp6m" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="card-title" style="margin-top:20px;padding-top:16px;">成本与审批参数</div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 战略业务成本</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-stratCost" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 信贷FTP</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-creditFtp" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 优化后风险成本</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-riskCost" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 团队长权限</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-cd-teamLimit" step="0.01" min="0" required oninput="ConfigPanel._renderChengduiDerived()"><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="card-title" style="margin-top:20px;padding-top:16px;">只读派生参数</div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">活期净FTP收益率</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-spreadDemand">--</div></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">3个月定期净FTP收益率</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-spread3m">--</div></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">6个月定期净FTP收益率</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-spread6m">--</div></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">团队长权限对应保证金比例</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-teamRatio">--</div></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">分管领导权限</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-leaderLimit">--</div></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">分管领导权限对应保证金比例</label>
+                            <div class="form-control-inline"><div class="readonly-metric" id="cd-derived-leaderRatio">--</div></div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">保存配置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.resetChengdui()">重置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.exportChengdui()">导出 JSON</button>
+                        </div>
+                    </form>
+                    <div style="margin-top:28px;">
+                        <div class="card-title">历史配置记录</div>
+                        <table class="history-table">
+                            <thead><tr><th>FTP收入</th><th>活期支出</th><th>战略成本</th><th>信贷FTP</th><th>风险成本</th><th>团队长权限</th><th>状态</th><th>操作时间</th><th>操作</th></tr></thead>
+                            <tbody id="chengdui-history-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -1041,9 +1487,31 @@ const Storage = (() => {
     /** 获取调价参数历史 */
     function getPriceAdjustHistory() { return get('priceAdjustHistory', []); }
 
-    return { get, set, getFTP, getPriceAdjustConfig, getFTPHistory, getPriceAdjustHistory, DEFAULT_FTP, DEFAULT_PRICE_ADJUST };
-})();
+    /* —— 承兑参数默认值（内部统一小数） —— */
+    const DEFAULT_CHENGDUI = {
+        ftpIncome:  0.0212,
+        ftpDemand:  0,
+        ftp3m:      0.011,
+        ftp6m:      0.013,
+        stratCost:  0.031,
+        creditFtp:  0.0213,
+        riskCost:   0.0031,
+        teamLimit:  0.045,
+        operator:   '系统默认',
+        operateTime: new Date().toISOString(),
+        status: 'active'
+    };
 
+    /** 获取承兑参数配置（合并默认值） */
+    function getChengduiConfig() { return { ...DEFAULT_CHENGDUI, ...get('chengduiConfig', DEFAULT_CHENGDUI) }; }
+
+    /** 获取承兑参数历史 */
+    function getChengduiHistory() { return get('chengduiConfigHistory', []); }
+
+    return { get, set, getFTP, getPriceAdjustConfig, getFTPHistory, getPriceAdjustHistory,
+             getChengduiConfig, getChengduiHistory,
+             DEFAULT_FTP, DEFAULT_PRICE_ADJUST, DEFAULT_CHENGDUI };
+})();
 /* ============================================================
    模块 3：UI — 屏幕切换、导航、角色显隐、消息提示
    ============================================================ */
@@ -1058,6 +1526,15 @@ const UI = (() => {
         /* 初始化各模块数据 */
         ToolMargin.loadFTP();
         ConfigPanel.init();
+        /*
+         * 初始化新增承兑工具的默认展示状态
+         * 说明：两个工具是 oninput/onchange 驱动，手动触发一次可确保
+         * - 空状态提示正确
+         * - 导出按钮默认隐藏
+         * - 收益打平“当前保证金比例对应价格”只读字段同步配置
+         */
+        if (typeof ToolFixedTerm !== 'undefined') ToolFixedTerm.recalc();
+        if (typeof ToolBreakeven !== 'undefined') ToolBreakeven.recalc();
     }
 
     /** 根据角色更新界面元素 */
@@ -1427,6 +1904,8 @@ const ConfigPanel = (() => {
         _loadFTPHistory();
         _loadPAForm();
         _loadPAHistory();
+        _loadChengduiForm();
+        _loadChengduiHistory();
     }
 
     /** 切换配置子 Tab */
@@ -1637,6 +2116,157 @@ const ConfigPanel = (() => {
         _loadPAHistory();
     }
 
+    /* ==================== 承兑参数配置 ==================== */
+
+    /** 保存承兑参数 */
+    function saveChengdui(e) {
+        e.preventDefault();
+        if (!Auth.isAdmin()) { alert('仅管理员可修改配置'); return; }
+
+        const ftpIncome  = parseFloat(document.getElementById('cfg-cd-ftpIncome').value);
+        const ftpDemand  = parseFloat(document.getElementById('cfg-cd-ftpDemand').value);
+        const ftp3m      = parseFloat(document.getElementById('cfg-cd-ftp3m').value);
+        const ftp6m      = parseFloat(document.getElementById('cfg-cd-ftp6m').value);
+        const stratCost  = parseFloat(document.getElementById('cfg-cd-stratCost').value);
+        const creditFtp  = parseFloat(document.getElementById('cfg-cd-creditFtp').value);
+        const riskCost   = parseFloat(document.getElementById('cfg-cd-riskCost').value);
+        const teamLimit  = parseFloat(document.getElementById('cfg-cd-teamLimit').value);
+
+        if ([ftpIncome, ftpDemand, ftp3m, ftp6m, stratCost, creditFtp, riskCost, teamLimit].some(isNaN)) {
+            alert('请填写所有必填项'); return;
+        }
+        if (ftpIncome <= 0) { alert('保证金FTP收入必须大于0'); return; }
+        if (creditFtp <= 0) { alert('信贷FTP必须大于0'); return; }
+        if (teamLimit <= 0) { alert('团队长权限必须大于0'); return; }
+
+        /* 页面输入为百分数，存储为小数 */
+        const config = {
+            ftpIncome:  toRatio(ftpIncome),
+            ftpDemand:  toRatio(ftpDemand),
+            ftp3m:      toRatio(ftp3m),
+            ftp6m:      toRatio(ftp6m),
+            stratCost:  toRatio(stratCost),
+            creditFtp:  toRatio(creditFtp),
+            riskCost:   toRatio(riskCost),
+            teamLimit:  toRatio(teamLimit),
+            operator:   '管理员',
+            operateTime: new Date().toISOString(),
+            status: 'active'
+        };
+        Storage.set('chengduiConfig', config);
+
+        let history = Storage.getChengduiHistory();
+        history = history.map(item => ({ ...item, status: 'inactive' }));
+        history.unshift(config);
+        Storage.set('chengduiConfigHistory', history);
+
+        UI.showAlert('chengdui-success');
+        _loadChengduiHistory();
+    }
+
+    /** 重置承兑参数表单 */
+    function resetChengdui() { _loadChengduiForm(); }
+
+    /** 导出承兑参数为 JSON */
+    function exportChengdui() {
+        const config = Storage.getChengduiConfig();
+        _downloadJSON(config, '承兑参数配置.json');
+    }
+
+    /** 加载承兑参数表单（小数 → 百分数展示） */
+    function _loadChengduiForm() {
+        const cfg = Storage.getChengduiConfig();
+        document.getElementById('cfg-cd-ftpIncome').value  = toPercent(cfg.ftpIncome).toFixed(2);
+        document.getElementById('cfg-cd-ftpDemand').value  = toPercent(cfg.ftpDemand).toFixed(2);
+        document.getElementById('cfg-cd-ftp3m').value      = toPercent(cfg.ftp3m).toFixed(2);
+        document.getElementById('cfg-cd-ftp6m').value      = toPercent(cfg.ftp6m).toFixed(2);
+        document.getElementById('cfg-cd-stratCost').value  = toPercent(cfg.stratCost).toFixed(2);
+        document.getElementById('cfg-cd-creditFtp').value  = toPercent(cfg.creditFtp).toFixed(2);
+        document.getElementById('cfg-cd-riskCost').value   = toPercent(cfg.riskCost).toFixed(2);
+        document.getElementById('cfg-cd-teamLimit').value  = toPercent(cfg.teamLimit).toFixed(2);
+        _renderChengduiDerived();
+    }
+
+    /** 实时刷新只读派生项 */
+    function _renderChengduiDerived() {
+        const ftpIncome = parseFloat(document.getElementById('cfg-cd-ftpIncome').value);
+        const ftpDemand = parseFloat(document.getElementById('cfg-cd-ftpDemand').value);
+        const ftp3m     = parseFloat(document.getElementById('cfg-cd-ftp3m').value);
+        const ftp6m     = parseFloat(document.getElementById('cfg-cd-ftp6m').value);
+        const creditFtp = parseFloat(document.getElementById('cfg-cd-creditFtp').value);
+        const riskCost  = parseFloat(document.getElementById('cfg-cd-riskCost').value);
+        const teamLimit = parseFloat(document.getElementById('cfg-cd-teamLimit').value);
+
+        if ([ftpIncome, ftpDemand, ftp3m, ftp6m, creditFtp, riskCost, teamLimit].some(isNaN)) return;
+
+        /* 输入为百分数，先转小数再计算 */
+        const cfg = {
+            ftpIncome:  toRatio(ftpIncome),
+            ftpDemand:  toRatio(ftpDemand),
+            ftp3m:      toRatio(ftp3m),
+            ftp6m:      toRatio(ftp6m),
+            creditFtp:  toRatio(creditFtp),
+            riskCost:   toRatio(riskCost),
+            teamLimit:  toRatio(teamLimit)
+        };
+        const d = getChengduiDerived(cfg);
+        document.getElementById('cd-derived-spreadDemand').textContent = formatPercent(d.spreadDemand);
+        document.getElementById('cd-derived-spread3m').textContent     = formatPercent(d.spread3m);
+        document.getElementById('cd-derived-spread6m').textContent     = formatPercent(d.spread6m);
+        document.getElementById('cd-derived-teamRatio').textContent    = formatPercent(d.teamRatio);
+        document.getElementById('cd-derived-leaderLimit').textContent  = formatPercent(d.leaderLimit);
+        document.getElementById('cd-derived-leaderRatio').textContent  = formatPercent(d.leaderRatio);
+    }
+
+    /** 渲染承兑参数历史记录 */
+    function _loadChengduiHistory() {
+        const history = Storage.getChengduiHistory();
+        const tbody = document.getElementById('chengdui-history-body');
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--ink-light);">暂无历史记录</td></tr>';
+            return;
+        }
+        tbody.innerHTML = history.map((item, i) => `
+            <tr>
+                <td><strong>${formatPercent(item.ftpIncome)}</strong></td>
+                <td>${formatPercent(item.ftpDemand)}</td>
+                <td>${formatPercent(item.stratCost)}</td>
+                <td>${formatPercent(item.creditFtp)}</td>
+                <td>${formatPercent(item.riskCost)}</td>
+                <td>${formatPercent(item.teamLimit)}</td>
+                <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '当前生效' : '已失效'}</span></td>
+                <td>${_fmtTime(item.operateTime)}</td>
+                <td>
+                    <span class="action-link" onclick="ConfigPanel._applyChengduiHistory(${i})">应用</span>
+                    <span class="action-link" onclick="ConfigPanel._deleteChengduiHistory(${i})">删除</span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function _applyChengduiHistory(index) {
+        const history = Storage.getChengduiHistory();
+        const cfg = history[index];
+        /* 小数 → 百分数回填 */
+        document.getElementById('cfg-cd-ftpIncome').value  = toPercent(cfg.ftpIncome).toFixed(2);
+        document.getElementById('cfg-cd-ftpDemand').value  = toPercent(cfg.ftpDemand).toFixed(2);
+        document.getElementById('cfg-cd-ftp3m').value      = toPercent(cfg.ftp3m).toFixed(2);
+        document.getElementById('cfg-cd-ftp6m').value      = toPercent(cfg.ftp6m).toFixed(2);
+        document.getElementById('cfg-cd-stratCost').value  = toPercent(cfg.stratCost).toFixed(2);
+        document.getElementById('cfg-cd-creditFtp').value  = toPercent(cfg.creditFtp).toFixed(2);
+        document.getElementById('cfg-cd-riskCost').value   = toPercent(cfg.riskCost).toFixed(2);
+        document.getElementById('cfg-cd-teamLimit').value  = toPercent(cfg.teamLimit).toFixed(2);
+        _renderChengduiDerived();
+    }
+
+    function _deleteChengduiHistory(index) {
+        if (!confirm('确定要删除这条历史记录吗？')) return;
+        let history = Storage.getChengduiHistory();
+        history.splice(index, 1);
+        Storage.set('chengduiConfigHistory', history);
+        _loadChengduiHistory();
+    }
+
     /** 格式化时间 */
     function _fmtTime(isoStr) {
         if (!isoStr) return '-';
@@ -1659,9 +2289,12 @@ const ConfigPanel = (() => {
         init, switchTab,
         saveFTP, resetFTP, exportFTP,
         savePriceAdjust, resetPriceAdjust, exportPriceAdjust,
+        saveChengdui, resetChengdui, exportChengdui,
         /* 暴露给 onclick 的内部方法 */
         _applyFTPHistory, _deleteFTPHistory,
-        _applyPAHistory, _deletePAHistory
+        _applyPAHistory, _deletePAHistory,
+        _applyChengduiHistory, _deleteChengduiHistory,
+        _renderChengduiDerived
     };
 })();
 
@@ -1736,9 +2369,742 @@ const Export = (() => {
 })();
 
 /* ============================================================
-   模块 8：Bootstrap — 页面初始化、默认配置加载、事件绑定
+   模块 9：ToolFixedTerm — 承兑-定期方案测算
    ============================================================ */
-const Bootstrap = (() => {
+const ToolFixedTerm = (() => {
+    let lastResult = null;
+
+    /** 获取最近计算结果（供导出使用） */
+    function getLastResult() { return lastResult; }
+
+    /** 主计算入口，由所有输入的 oninput/onchange 触发 */
+    function recalc() {
+        const ratioB   = parseFloat(document.getElementById('ft-ratioB').value);
+        const ratioA   = parseFloat(document.getElementById('ft-ratioA').value);
+        const depositB = document.getElementById('ft-depositB').value;
+        const depositA = document.getElementById('ft-depositA').value;
+        const cycleB   = parseFloat(document.getElementById('ft-cycleB').value);
+        const cycleA   = parseFloat(document.getElementById('ft-cycleA').value);
+        const amountB  = parseFloat(document.getElementById('ft-amountB').value);
+        const amountA  = parseFloat(document.getElementById('ft-amountA').value);
+
+        /* 输入不完整时只清空结果，并给出轻提示 */
+        if ([ratioB, ratioA, cycleB, cycleA, amountB, amountA].some(isNaN)) {
+            _showSoftHint('请填写全部数值项后再查看对比结果。');
+            _clearResults();
+            return;
+        }
+
+        if (ratioB <= 0 || ratioB >= 100 || ratioA <= 0 || ratioA >= 100) {
+            _showSoftHint('保证金比例须大于 0% 且小于 100%。');
+            _clearResults();
+            return;
+        }
+        if (cycleB < 1 || cycleB > 12 || cycleA < 1 || cycleA > 12) {
+            _showSoftHint('开票周期须在 1-12 月之间。');
+            _clearResults();
+            return;
+        }
+        if (amountB <= 0 || amountA <= 0) {
+            _showSoftHint('开票金额必须大于 0。');
+            _clearResults();
+            return;
+        }
+
+        const cfg     = Storage.getChengduiConfig();
+        const derived = getChengduiDerived(cfg);
+
+        /* 百分数 → 小数 */
+        const rB = toRatio(ratioB);
+        const rA = toRatio(ratioA);
+
+        /* 净FTP收益率 */
+        const spreadB = getDepositSpread(depositB, derived);
+        const spreadA = getDepositSpread(depositA, derived);
+
+        /* 最低贷款定价 */
+        const minPriceB = calcMinPriceByRatio(rB, cfg.creditFtp);
+        const minPriceA = calcMinPriceByRatio(rA, cfg.creditFtp);
+
+        /* 单票收益 */
+        const revenueB = _calcRevenue(amountB, rB, spreadB, cycleB, cfg.stratCost, cfg.creditFtp, cfg.riskCost);
+        const revenueA = _calcRevenue(amountA, rA, spreadA, cycleA, cfg.stratCost, cfg.creditFtp, cfg.riskCost);
+        const diff = revenueB - revenueA;
+
+        /* 绝对收益分析 */
+        const unitRevB = rB * spreadB * cycleB / 12
+                       - (1 - rB) * (cfg.stratCost - cfg.creditFtp) * cycleB / 12
+                       - (1 - rB) * cfg.riskCost * cycleB / 12;
+        const beAmount = unitRevB !== 0 ? revenueA / unitRevB : NaN;
+
+        const beRatioDenom = cycleB * amountB * (cfg.stratCost - cfg.creditFtp + cfg.riskCost + spreadB);
+        const beRatio = beRatioDenom !== 0
+            ? (12 * revenueA + cycleB * amountB * (cfg.stratCost - cfg.creditFtp + cfg.riskCost)) / beRatioDenom
+            : NaN;
+
+        /* 更新 DOM */
+        _clearSoftHint();
+        _updateTable(minPriceB, minPriceA, spreadB, spreadA, revenueB, revenueA, diff);
+        _updateSummary(revenueB, revenueA, diff);
+        _updateAnalysis(beAmount, beRatio, rB, derived, cfg);
+        _drawChart(amountB, spreadB, cycleB, revenueA, rB, beRatio, derived, cfg);
+
+        lastResult = {
+            ratioB, ratioA, depositB, depositA, cycleB, cycleA, amountB, amountA,
+            minPriceB, minPriceA, spreadB, spreadA, revenueB, revenueA, diff,
+            beAmount, beRatio
+        };
+        document.getElementById('exportFixedTermPdfBtn').style.display = 'inline-block';
+    }
+
+    /** 单票收益公式（冻结） */
+    function _calcRevenue(amount, ratio, spread, cycle, stratCost, creditFtp, riskCost) {
+        return amount * ratio * spread * cycle / 12
+             - amount * (1 - ratio) * (stratCost - creditFtp) * cycle / 12
+             - amount * (1 - ratio) * riskCost * cycle / 12;
+    }
+
+    function _updateTable(minPriceB, minPriceA, spreadB, spreadA, revenueB, revenueA, diff) {
+        document.getElementById('ft-minPriceB').textContent  = formatPercent(minPriceB);
+        document.getElementById('ft-minPriceA').textContent  = formatPercent(minPriceA);
+        document.getElementById('ft-spreadB').textContent    = formatPercent(spreadB);
+        document.getElementById('ft-spreadA').textContent    = formatPercent(spreadA);
+        document.getElementById('ft-revenueB').textContent   = formatWan(revenueB);
+        document.getElementById('ft-revenueA').textContent   = formatWan(revenueA);
+        const diffEl = document.getElementById('ft-revenueDiff');
+        diffEl.textContent = (diff >= 0 ? '+' : '') + formatWan(diff);
+        diffEl.className = diff >= 0 ? 'diff-positive' : 'diff-negative';
+    }
+
+    function _updateSummary(revenueB, revenueA, diff) {
+        const bar = document.getElementById('ft-summary');
+        bar.style.display = 'flex';
+        document.getElementById('ft-rev-b').textContent = formatWan(revenueB);
+        document.getElementById('ft-rev-a').textContent = formatWan(revenueA);
+        const diffEl = document.getElementById('ft-rev-diff');
+        diffEl.textContent = (diff >= 0 ? '+' : '') + formatWan(diff);
+        diffEl.className = 'ft-summary-diff ' + (diff >= 0 ? 'diff-positive' : 'diff-negative');
+    }
+
+    function _updateAnalysis(beAmount, beRatio, rB, derived, cfg) {
+        const card = document.getElementById('ft-analysis-card');
+        card.style.display = 'block';
+
+        document.getElementById('ft-beAmount').textContent = isNaN(beAmount) ? '--' : formatWan(beAmount);
+        document.getElementById('ft-beRatio').textContent  = isNaN(beRatio)  ? '--' : formatPercent(beRatio);
+
+        /* 审批提示 */
+        const teamHint   = document.getElementById('ft-hint-team');
+        const leaderHint = document.getElementById('ft-hint-leader');
+        const exceedHint = document.getElementById('ft-hint-exceed');
+        teamHint.classList.remove('show');
+        leaderHint.classList.remove('show');
+        exceedHint.classList.remove('show');
+
+        if (rB <= derived.leaderRatio) {
+            exceedHint.textContent = '⚠ 方案B保证金比例低于分管领导权限对应比例（' + formatPercent(derived.leaderRatio) + '），需分管领导审批';
+            exceedHint.classList.add('show');
+        } else if (rB <= derived.teamRatio) {
+            leaderHint.textContent = '⚠ 方案B保证金比例低于团队长权限对应比例（' + formatPercent(derived.teamRatio) + '），需团队长审批';
+            leaderHint.classList.add('show');
+        } else {
+            teamHint.textContent = '✓ 方案B保证金比例在团队长权限范围内（' + formatPercent(derived.teamRatio) + '）';
+            teamHint.classList.add('show');
+        }
+    }
+
+    function _drawChart(amountB, spreadB, cycleB, revenueA, rB, beRatio, derived, cfg) {
+        const card = document.getElementById('ft-chart-card');
+        card.style.display = 'block';
+        const canvas = document.getElementById('ft-chart');
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = rect.width  * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        const W = rect.width, H = rect.height;
+        ctx.clearRect(0, 0, W, H);
+
+        /* 生成曲线数据：h 从 0.01 到 0.99 */
+        const pts = [];
+        for (let i = 1; i <= 99; i++) {
+            const h = i / 100;
+            const y = amountB * h * spreadB * cycleB / 12
+                    - amountB * (1 - h) * (cfg.stratCost - cfg.creditFtp) * cycleB / 12
+                    - amountB * (1 - h) * cfg.riskCost * cycleB / 12
+                    - revenueA;
+            pts.push({ x: h, y });
+        }
+
+        const pad = 60;
+        const cW = W - pad * 2, cH = H - pad * 2;
+        const minY = Math.min(...pts.map(p => p.y));
+        const maxY = Math.max(...pts.map(p => p.y));
+        const yRange = maxY - minY || 1;
+        const xScale = h => pad + h * cW;
+        const yScale = y => H - pad - ((y - minY) / yRange) * cH;
+
+        /* 网格 */
+        ctx.strokeStyle = '#E8E4DC'; ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = pad + (cH / 5) * i;
+            ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
+            const x = pad + (cW / 5) * i;
+            ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, H - pad); ctx.stroke();
+        }
+
+        /* Y=0 基准线 */
+        const y0 = yScale(0);
+        const hasZeroLine = y0 >= pad && y0 <= H - pad;
+        if (hasZeroLine) {
+            ctx.strokeStyle = '#C0392B'; ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath(); ctx.moveTo(pad, y0); ctx.lineTo(W - pad, y0); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        /* 坐标轴 */
+        ctx.strokeStyle = '#1A1A2E'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad);
+        ctx.lineTo(W - pad, H - pad); ctx.stroke();
+
+        /* Y 轴标签 */
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#4A4A6A'; ctx.textAlign = 'right';
+        for (let i = 0; i <= 5; i++) {
+            const val = minY + yRange * (5 - i) / 5;
+            ctx.fillText(val.toFixed(1), pad - 6, pad + (cH / 5) * i + 4);
+        }
+        /* X 轴标签 */
+        ctx.textAlign = 'center';
+        for (let i = 0; i <= 5; i++) {
+            const h = i / 5;
+            ctx.fillText((h * 100).toFixed(0) + '%', pad + h * cW, H - pad + 18);
+        }
+
+        /* 曲线 */
+        ctx.strokeStyle = '#2C5F8A'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        pts.forEach((p, idx) => {
+            const x = xScale(p.x), y = yScale(p.y);
+            idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        /* 标记点 */
+        const marks = [
+            { h: derived.teamRatio,   label: '团队长权限', color: '#2D7D46' },
+            { h: derived.leaderRatio, label: '分管领导权限', color: '#B7791F' },
+            { h: rB,                  label: '方案B',      color: '#C9A84C' }
+        ];
+
+        /*
+         * 盈亏平衡点：Y = 0 与曲线交点
+         * 仅当 beRatio 有效且 Y=0 基准线落在可视区时标记，避免越界点误导。
+         */
+        if (Number.isFinite(beRatio) && beRatio > 0 && beRatio < 1 && hasZeroLine) {
+            marks.push({ h: beRatio, label: '盈亏平衡点', color: '#C0392B', fixedY: 0 });
+        }
+
+        marks.forEach(m => {
+            const y = m.fixedY === 0
+                ? 0
+                : (amountB * m.h * spreadB * cycleB / 12
+                 - amountB * (1 - m.h) * (cfg.stratCost - cfg.creditFtp) * cycleB / 12
+                 - amountB * (1 - m.h) * cfg.riskCost * cycleB / 12
+                 - revenueA);
+            const px = xScale(m.h), py = yScale(y);
+            ctx.fillStyle = m.color;
+            ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(m.label, px, py - 10);
+        });
+
+        /* 轴标题 */
+        ctx.fillStyle = '#4A4A6A'; ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('保证金比例', W / 2, H - 6);
+        ctx.save(); ctx.translate(16, H / 2); ctx.rotate(-Math.PI / 2);
+        ctx.fillText('相对收益 (万)', 0, 0); ctx.restore();
+    }
+
+    function _clearResults() {
+        lastResult = null;
+        document.getElementById('ft-summary').style.display = 'none';
+        document.getElementById('ft-analysis-card').style.display = 'none';
+        document.getElementById('ft-chart-card').style.display = 'none';
+        document.getElementById('exportFixedTermPdfBtn').style.display = 'none';
+        ['ft-minPriceB','ft-minPriceA','ft-spreadB','ft-spreadA',
+         'ft-revenueB','ft-revenueA','ft-revenueDiff'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '--';
+        });
+    }
+
+    /** 显示输入轻提示（弱提示，不阻断输入） */
+    function _showSoftHint(msg) {
+        const el = document.getElementById('ft-softHint');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show', 'warn');
+    }
+
+    /** 清空输入轻提示 */
+    function _clearSoftHint() {
+        const el = document.getElementById('ft-softHint');
+        if (!el) return;
+        el.textContent = '';
+        el.classList.remove('show', 'warn');
+    }
+
+    return { recalc, getLastResult };
+})();
+
+/* ============================================================
+   模块 10：ToolBreakeven — 承兑-收益打平测算
+   ============================================================ */
+const ToolBreakeven = (() => {
+    let lastResult = null;
+
+    function getLastResult() { return lastResult; }
+
+    function recalc() {
+        const currentRatioP = parseFloat(document.getElementById('be-currentRatio').value);
+        const avgExposure   = parseFloat(document.getElementById('be-avgExposure').value);
+        const avgMargin     = parseFloat(document.getElementById('be-avgMargin').value);
+        const loanRatioP    = parseFloat(document.getElementById('be-loanRatio').value);
+        const targetRatioP  = parseFloat(document.getElementById('be-targetRatio').value);
+        const depositType   = document.getElementById('be-depositType').value;
+
+        /* 当前保证金比例对应价格（只要 currentRatio 有效就实时更新） */
+        if (!isNaN(currentRatioP) && currentRatioP > 0 && currentRatioP < 100) {
+            const cfg = Storage.getChengduiConfig();
+            const cr = toRatio(currentRatioP);
+            const cp = calcMinPriceByRatio(cr, cfg.creditFtp);
+            document.getElementById('be-currentPrice').textContent = formatPercent(cp);
+        } else {
+            document.getElementById('be-currentPrice').textContent = '--';
+        }
+
+        /* 输入不完整时只显示空状态 */
+        if ([currentRatioP, avgExposure, avgMargin, loanRatioP, targetRatioP].some(isNaN)) {
+            _showSoftHint('请补全左侧全部参数。');
+            _showEmpty(); return;
+        }
+        if (currentRatioP <= 0 || currentRatioP >= 100 || targetRatioP <= 0 || targetRatioP >= 100) {
+            _showSoftHint('保证金比例须大于 0% 且小于 100%。');
+            _showEmpty(); return;
+        }
+        if (loanRatioP < 0 || loanRatioP > 100) {
+            _showSoftHint('贷款日均额占须在 0%-100% 之间。');
+            _showEmpty(); return;
+        }
+        if (avgExposure < 0 || avgMargin < 0) {
+            _showSoftHint('敞口金额和保证金金额不能为负数。');
+            _showEmpty(); return;
+        }
+
+        const cfg     = Storage.getChengduiConfig();
+        const derived = getChengduiDerived(cfg);
+
+        const currentRatio = toRatio(currentRatioP);
+        const targetRatio  = toRatio(targetRatioP);
+        const loanRatio    = toRatio(loanRatioP);
+
+        const currentPrice = calcMinPriceByRatio(currentRatio, cfg.creditFtp);
+        const spread       = getDepositSpread(depositType, derived);
+
+        /* 核心公式（冻结，与 Excel B25 完全一致） */
+        const numerator = (avgMargin * spread)
+                        - (avgExposure * (cfg.stratCost - cfg.creditFtp))
+                        - (avgExposure * cfg.riskCost);
+
+        const denominator = (targetRatio * spread)
+                          - ((1 - targetRatio) * (cfg.stratCost - cfg.creditFtp))
+                          - ((1 - targetRatio) * cfg.riskCost)
+                          - ((currentRatio - targetRatio) * (currentPrice - cfg.stratCost - cfg.riskCost) * loanRatio);
+
+        if (Math.abs(denominator) < 1e-12) {
+            _showSoftHint('当前参数组合导致分母为 0，请调整比例或贷款占比。');
+            _showError('参数组合异常，分母为零，无法计算'); return;
+        }
+
+        const futureAmount = numerator / denominator;
+        const increase     = futureAmount - (avgExposure + avgMargin);
+
+        _clearSoftHint();
+        _showResult(futureAmount, increase, spread, currentRatioP, currentPrice, targetRatioP, avgExposure, avgMargin);
+        _drawChart(avgMargin, avgExposure, loanRatio, currentRatio, currentPrice, targetRatio, derived, cfg);
+
+        lastResult = {
+            currentRatioP, avgExposure, avgMargin, loanRatioP, targetRatioP, depositType,
+            currentPrice, spread, futureAmount, increase
+        };
+        document.getElementById('exportBreakevenPdfBtn').style.display = 'inline-block';
+    }
+
+    function _showResult(futureAmount, increase, spread, currentRatioP, currentPrice, targetRatioP, avgExposure, avgMargin) {
+        document.getElementById('be-empty').style.display = 'none';
+        document.getElementById('be-result').classList.add('show');
+
+        document.getElementById('be-futureAmount').textContent = futureAmount.toFixed(2);
+        document.getElementById('be-increase').textContent     = (increase >= 0 ? '+' : '') + increase.toFixed(2) + ' 万';
+        document.getElementById('be-spread').textContent       = formatPercent(spread);
+
+        document.getElementById('be-d-currentRatio').textContent  = currentRatioP.toFixed(0) + '%';
+        document.getElementById('be-d-currentPrice').textContent  = formatPercent(currentPrice);
+        document.getElementById('be-d-targetRatio').textContent   = targetRatioP.toFixed(0) + '%';
+        document.getElementById('be-d-exposure').textContent      = avgExposure.toFixed(2) + ' 万';
+        document.getElementById('be-d-margin').textContent        = avgMargin.toFixed(2) + ' 万';
+    }
+
+    function _showEmpty() {
+        lastResult = null;
+        document.getElementById('be-empty').style.display = 'block';
+        document.getElementById('be-empty').querySelector('div:last-child').textContent = '请在左侧输入参数';
+        document.getElementById('be-result').classList.remove('show');
+        document.getElementById('exportBreakevenPdfBtn').style.display = 'none';
+    }
+
+    function _showError(msg) {
+        _showEmpty();
+        document.getElementById('be-empty').querySelector('div:last-child').textContent = msg;
+    }
+
+    /** 显示输入轻提示（弱提示，不阻断输入） */
+    function _showSoftHint(msg) {
+        const el = document.getElementById('be-softHint');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show', 'warn');
+    }
+
+    /** 清空输入轻提示 */
+    function _clearSoftHint() {
+        const el = document.getElementById('be-softHint');
+        if (!el) return;
+        el.textContent = '';
+        el.classList.remove('show', 'warn');
+    }
+
+    function _drawChart(avgMargin, avgExposure, loanRatio, currentRatio, currentPrice, targetRatio, derived, cfg) {
+        const canvas = document.getElementById('be-chart');
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = rect.width  * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        const W = rect.width, H = rect.height;
+        ctx.clearRect(0, 0, W, H);
+
+        /* 图表固定使用活期 spreadDemand（复刻 Excel J 列逻辑） */
+        const spreadDemand = derived.spreadDemand;
+        const numerator = (avgMargin * spreadDemand)
+                        - (avgExposure * (cfg.stratCost - cfg.creditFtp))
+                        - (avgExposure * cfg.riskCost);
+
+        const pts = [];
+        for (let i = 0; i <= 100; i++) {
+            const h = i / 100;
+            const denom = (h * spreadDemand)
+                        - ((1 - targetRatio) * (cfg.stratCost - cfg.creditFtp))
+                        - ((1 - h) * cfg.riskCost)
+                        - ((currentRatio - h) * (currentPrice - cfg.stratCost - cfg.riskCost) * loanRatio);
+            if (Math.abs(denom) < 1e-12) { pts.push({ x: h, y: null }); continue; }
+            const jh = numerator / denom;
+            pts.push({ x: h, y: (jh >= 0 && jh <= 2000) ? jh : null });
+        }
+
+        const validPts = pts.filter(p => p.y !== null);
+        if (validPts.length === 0) {
+            ctx.font = '14px sans-serif'; ctx.fillStyle = '#8A8AAA'; ctx.textAlign = 'center';
+            ctx.fillText('当前参数下无有效数据点', W / 2, H / 2);
+            return;
+        }
+
+        const pad = 60;
+        const cW = W - pad * 2, cH = H - pad * 2;
+        const maxY = Math.max(...validPts.map(p => p.y));
+        const xScale = h => pad + h * cW;
+        const yScale = y => H - pad - (y / (maxY * 1.1)) * cH;
+
+        /* 网格 */
+        ctx.strokeStyle = '#E8E4DC'; ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = pad + (cH / 5) * i;
+            ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
+            const x = pad + (cW / 5) * i;
+            ctx.beginPath(); ctx.moveTo(x, pad); ctx.lineTo(x, H - pad); ctx.stroke();
+        }
+
+        /* 坐标轴 */
+        ctx.strokeStyle = '#1A1A2E'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad);
+        ctx.lineTo(W - pad, H - pad); ctx.stroke();
+
+        /* Y 轴标签 */
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#4A4A6A'; ctx.textAlign = 'right';
+        for (let i = 0; i <= 5; i++) {
+            const val = maxY * 1.1 * (5 - i) / 5;
+            ctx.fillText(val.toFixed(0), pad - 6, pad + (cH / 5) * i + 4);
+        }
+        /* X 轴标签 */
+        ctx.textAlign = 'center';
+        for (let i = 0; i <= 5; i++) {
+            ctx.fillText((i * 20) + '%', pad + (cW / 5) * i, H - pad + 18);
+        }
+
+        /* 折线（空值断开） */
+        ctx.strokeStyle = '#2C5F8A'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        let started = false;
+        pts.forEach(p => {
+            if (p.y === null) { started = false; return; }
+            const x = xScale(p.x), y = yScale(p.y);
+            if (!started) { ctx.moveTo(x, y); started = true; }
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        /* 目标比例标记点 */
+        const tPt = pts.find(p => Math.abs(p.x - targetRatio) < 0.005 && p.y !== null);
+        if (tPt) {
+            ctx.fillStyle = '#C9A84C';
+            ctx.beginPath(); ctx.arc(xScale(tPt.x), yScale(tPt.y), 5, 0, Math.PI * 2); ctx.fill();
+            ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#C9A84C';
+            ctx.fillText('目标比例', xScale(tPt.x), yScale(tPt.y) - 10);
+        }
+
+        /* 轴标题 */
+        ctx.fillStyle = '#4A4A6A'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('保证金比例（活期情景）', W / 2, H - 6);
+        ctx.save(); ctx.translate(16, H / 2); ctx.rotate(-Math.PI / 2);
+        ctx.fillText('未来三个月开票金额 (万)', 0, 0); ctx.restore();
+    }
+
+    return { recalc, getLastResult };
+})();
+
+/* ============================================================
+   公共工具函数 — 承兑工具共用
+   ============================================================ */
+/** 百分数 → 小数：80 → 0.8 */
+function toRatio(v) { return v / 100; }
+
+/** 小数 → 百分数：0.8 → 80 */
+function toPercent(v) { return v * 100; }
+
+/** 格式化百分数展示：0.0212 → "2.12%" */
+function formatPercent(v, digits) {
+    return (v * 100).toFixed(digits !== undefined ? digits : 2) + '%';
+}
+
+/** 格式化万元：15.1392 → "15.14万" */
+function formatWan(v, digits) {
+    return v.toFixed(digits !== undefined ? digits : 2) + '万';
+}
+
+/**
+ * 计算保证金比例对应的最低贷款定价
+ * 公式：ROUNDDOWN(ratio * creditFtp / (1 - ratio), 2) + creditFtp
+ */
+function calcMinPriceByRatio(ratio, creditFtp) {
+    if (ratio >= 1) return NaN;
+    const base = (ratio * creditFtp) / (1 - ratio);
+    return Math.floor(base * 100) / 100 + creditFtp;
+}
+
+/**
+ * 根据存款类型获取净FTP收益率
+ * @param {string} depositType - '活期'|'3个月定期'|'6个月定期'
+ * @param {{spreadDemand,spread3m,spread6m}} derived
+ */
+function getDepositSpread(depositType, derived) {
+    if (depositType === '3个月定期') return derived.spread3m;
+    if (depositType === '6个月定期') return derived.spread6m;
+    return derived.spreadDemand;
+}
+
+/**
+ * 统一计算承兑派生参数（B5:B7, B19:B21）
+ * 输入 cfg 中所有字段均为小数
+ */
+function getChengduiDerived(cfg) {
+    const spreadDemand = cfg.ftpIncome - cfg.ftpDemand;
+    const spread3m     = cfg.ftpIncome - cfg.ftp3m;
+    const spread6m     = cfg.ftpIncome - cfg.ftp6m;
+    const teamRatio    = cfg.teamLimit > 0 ? (cfg.teamLimit - cfg.creditFtp) / cfg.teamLimit : 0;
+    const leaderLimit  = cfg.riskCost + cfg.creditFtp;
+    const leaderRatio  = leaderLimit > 0 ? (leaderLimit - cfg.creditFtp) / leaderLimit : 0;
+    return { spreadDemand, spread3m, spread6m, teamRatio, leaderLimit, leaderRatio };
+}
+
+/* ============================================================
+   模块 11：PrintService — 打印区域构建（共享）
+   说明：复用现有 #print-area + window.print() 机制，避免重复模板
+   ============================================================ */
+const PrintService = (() => {
+    /**
+     * 将 Canvas 图表转为 base64 图片
+     * @param {string} canvasId
+     * @returns {string} dataURL 或空字符串
+     */
+    function canvasToDataURL(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return '';
+        try { return canvas.toDataURL('image/png'); } catch { return ''; }
+    }
+
+    /**
+     * 构建“键值对”网格 HTML
+     * @param {{label:string,value:string}[]} items
+     */
+    function buildGrid(items) {
+        return (items || []).map(item => `
+            <div class="print-item">
+                <span class="print-item-label">${item.label}：</span>
+                <span class="print-item-value">${item.value}</span>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * 构建“结果卡片”HTML
+     * @param {{label:string,value:string}[]} items
+     */
+    function buildResultBoxes(items) {
+        return (items || []).map(item => `
+            <div class="print-result-box">
+                <div class="print-result-label">${item.label}</div>
+                <div class="print-result-value">${item.value}</div>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * 统一打印入口
+     * @param {{
+     * title: string,
+     * inputItems: {label:string,value:string}[],
+     * resultItems: {label:string,value:string}[],
+     * detailItems?: {label:string,value:string}[],
+     * chartCanvasId?: string,
+     * footer?: string
+     * }} options
+     */
+    function print(options) {
+        const now = new Date().toLocaleString('zh-CN');
+        const role = Auth.isAdmin() ? '管理员' : '客户经理';
+        const chartImg = options.chartCanvasId ? canvasToDataURL(options.chartCanvasId) : '';
+
+        const html = `
+            <div class="print-title">${options.title}</div>
+            <div class="print-time">导出时间：${now}　　操作角色：${role}</div>
+            <div class="print-section">
+                <div class="print-section-title">输入参数</div>
+                <div class="print-grid">${buildGrid(options.inputItems)}</div>
+            </div>
+            <div class="print-section">
+                <div class="print-section-title">计算结果</div>
+                <div class="print-results">${buildResultBoxes(options.resultItems)}</div>
+            </div>
+            ${(options.detailItems && options.detailItems.length > 0) ? `
+            <div class="print-section">
+                <div class="print-section-title">结果明细</div>
+                <div class="print-grid">${buildGrid(options.detailItems)}</div>
+            </div>` : ''}
+            ${chartImg ? `
+            <div class="print-section">
+                <div class="print-section-title">图表</div>
+                <div class="print-chart"><img src="${chartImg}" alt="图表"></div>
+            </div>` : ''}
+            <div class="print-footer">${options.footer || '本报告由一户一策业务工具台生成，仅供内部参考'}</div>
+        `;
+
+        document.getElementById('print-area').innerHTML = html;
+        /* 延迟触发打印，确保 print-area 完成渲染 */
+        setTimeout(() => window.print(), 200);
+    }
+
+    return { print };
+})();
+
+/* ============================================================
+   模块 12：ExportFixedTerm — 定期方案测算导出
+   ============================================================ */
+const ExportFixedTerm = (() => {
+    function printPDF() {
+        const result = ToolFixedTerm.getLastResult();
+        if (!result) { alert('请先完成一次有效计算'); return; }
+
+        PrintService.print({
+            title: '承兑-定期方案测算报告',
+            chartCanvasId: 'ft-chart',
+            inputItems: [
+                { label: '方案B保证金比例', value: `${result.ratioB.toFixed(0)}%` },
+                { label: '方案B活期/定期', value: result.depositB },
+                { label: '方案B开票周期', value: `${result.cycleB} 月` },
+                { label: '方案B开票金额', value: `${result.amountB.toFixed(2)} 万` },
+                { label: '方案A保证金比例', value: `${result.ratioA.toFixed(0)}%` },
+                { label: '方案A活期/定期', value: result.depositA },
+                { label: '方案A开票周期', value: `${result.cycleA} 月` },
+                { label: '方案A开票金额', value: `${result.amountA.toFixed(2)} 万` }
+            ],
+            resultItems: [
+                { label: '方案B单票收益', value: formatWan(result.revenueB) },
+                { label: '方案A单票收益', value: formatWan(result.revenueA) },
+                { label: '收益差异(B-A)', value: `${result.diff >= 0 ? '+' : ''}${formatWan(result.diff)}` }
+            ],
+            detailItems: [
+                { label: '方案B最低贷款定价', value: formatPercent(result.minPriceB) },
+                { label: '方案A最低贷款定价', value: formatPercent(result.minPriceA) },
+                { label: '方案B保证金收益率', value: formatPercent(result.spreadB) },
+                { label: '方案A保证金收益率', value: formatPercent(result.spreadA) },
+                { label: 'Breakeven开票金额', value: isNaN(result.beAmount) ? '--' : formatWan(result.beAmount) },
+                { label: 'Breakeven保证金比例', value: isNaN(result.beRatio) ? '--' : formatPercent(result.beRatio) }
+            ]
+        });
+    }
+
+    return { printPDF };
+})();
+
+/* ============================================================
+   模块 13：ExportBreakeven — 收益打平测算导出
+   ============================================================ */
+const ExportBreakeven = (() => {
+    function printPDF() {
+        const result = ToolBreakeven.getLastResult();
+        if (!result) { alert('请先完成一次有效计算'); return; }
+
+        PrintService.print({
+            title: '承兑-收益打平测算报告',
+            chartCanvasId: 'be-chart',
+            inputItems: [
+                { label: '当前生效保证金比例', value: `${result.currentRatioP.toFixed(0)}%` },
+                { label: '目标保证金比例', value: `${result.targetRatioP.toFixed(0)}%` },
+                { label: '活期/定期', value: result.depositType },
+                { label: '过去三个月均敞口金额', value: `${result.avgExposure.toFixed(2)} 万` },
+                { label: '过去三个月均保证金金额', value: `${result.avgMargin.toFixed(2)} 万` },
+                { label: '过去三个月贷款日均额占', value: `${result.loanRatioP.toFixed(0)}%` }
+            ],
+            resultItems: [
+                { label: '未来三个月均开票金额', value: `${result.futureAmount.toFixed(2)} 万` },
+                { label: '未来三个月需提升开票金额', value: `${result.increase >= 0 ? '+' : ''}${result.increase.toFixed(2)} 万` },
+                { label: '保证金收益率', value: formatPercent(result.spread) }
+            ],
+            detailItems: [
+                { label: '当前保证金比例对应价格', value: formatPercent(result.currentPrice) },
+                { label: '图表口径', value: '固定使用活期净FTP收益率(B5)' }
+            ]
+        });
+    }
+
+    return { printPDF };
+})();
+
+/* ============================================================
+   模块 8：Bootstrap — 页面初始化、默认配置加载、事件绑定
+   ============================================================ */const Bootstrap = (() => {
     function init() {
         /* 检查是否已有登录态 */
         const session = Auth.getSession();
