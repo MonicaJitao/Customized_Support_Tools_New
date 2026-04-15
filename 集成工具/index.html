@@ -743,6 +743,8 @@ input, button, select, textarea { font-family: inherit; }
     }
 }
 </style>
+<!-- html2canvas：用于将网页元素截图为 PNG 图片 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <!-- ============================================================
@@ -856,9 +858,9 @@ input, button, select, textarea { font-family: inherit; }
         <div class="content-page" id="page-price">
             <div class="page-header-bar">
                 <div class="page-title">一户一策调价计算器</div>
-                <button class="btn btn-outline" id="exportPdfBtn" style="display:none;" onclick="Export.printPDF()">导出 PDF</button>
+                <button class="btn btn-outline" id="exportPdfBtn" style="display:none;" onclick="Export.printPDF()">导出 PNG</button>
             </div>
-            <div class="two-col">
+            <div class="two-col" id="pa-two-col">
                 <!-- 左侧输入 -->
                 <div class="card">
                     <div class="card-title">参数配置与计算</div>
@@ -896,7 +898,7 @@ input, button, select, textarea { font-family: inherit; }
                     <button class="btn btn-primary btn-block" onclick="ToolPriceAdjust.calculate()">计算目标额度</button>
                 </div>
                 <!-- 右侧结果 -->
-                <div class="card">
+                <div class="card" id="pa-result-card">
                     <div class="card-title">计算结果</div>
                     <div class="alert-warning" id="pa-warning"></div>
                     <div class="result-empty" id="pa-empty">
@@ -935,8 +937,10 @@ input, button, select, textarea { font-family: inherit; }
         <div class="content-page" id="page-fixed-term">
             <div class="page-header-bar">
                 <div class="page-title">承兑-定期方案测算</div>
-                <button class="btn btn-outline" id="exportFixedTermPdfBtn" style="display:none;" onclick="ExportFixedTerm.printPDF()">导出 PDF</button>
+                <button class="btn btn-outline" id="exportFixedTermPdfBtn" style="display:none;" onclick="ExportFixedTerm.printPDF()">导出 PNG</button>
             </div>
+            <!-- 结果区域 wrapper（用于 html2canvas 截图） -->
+            <div id="ft-result-area">
             <!-- 收益摘要 -->
             <div class="ft-summary-bar" id="ft-summary" style="display:none;">
                 <div class="ft-summary-item">
@@ -1065,15 +1069,16 @@ input, button, select, textarea { font-family: inherit; }
                 <div class="card-title">保证金比例-收益曲线（相对方案A）</div>
                 <div class="chart-wrap"><canvas id="ft-chart"></canvas></div>
             </div>
+            </div><!-- /ft-result-area -->
         </div>
 
         <!-- ====== 内容区 4：承兑-收益打平测算 ====== -->
         <div class="content-page" id="page-breakeven">
             <div class="page-header-bar">
                 <div class="page-title">承兑-收益打平测算</div>
-                <button class="btn btn-outline" id="exportBreakevenPdfBtn" style="display:none;" onclick="ExportBreakeven.printPDF()">导出 PDF</button>
+                <button class="btn btn-outline" id="exportBreakevenPdfBtn" style="display:none;" onclick="ExportBreakeven.printPDF()">导出 PNG</button>
             </div>
-            <div class="two-col">
+            <div class="two-col" id="be-two-col">
                 <!-- 左侧输入 -->
                 <div class="card">
                     <div class="card-title">计算参数</div>
@@ -1121,7 +1126,7 @@ input, button, select, textarea { font-family: inherit; }
                     </div>
                 </div>
                 <!-- 右侧结果 -->
-                <div class="card">
+                <div class="card" id="be-result-card">
                     <div class="card-title">计算结果</div>
                     <div class="result-empty" id="be-empty">
                         <div class="result-empty-icon">&#9670;</div>
@@ -2299,70 +2304,18 @@ const ConfigPanel = (() => {
 })();
 
 /* ============================================================
-   模块 7：Export — 打印导出 PDF
+   模块 7：Export — 打印导出 PNG
    将输入参数、计算结果和图表写入 #print-area，调用 window.print()
    ============================================================ */
 const Export = (() => {
     /**
-     * 一键导出 PDF（通过浏览器打印）
+     * 一键导出 PNG（通过 html2canvas 截图）
      * 触发条件：调价计算器已有完整计算结果
      */
     function printPDF() {
         const result = ToolPriceAdjust.getLastResult();
         if (!result) { alert('请先完成一次有效计算'); return; }
-
-        /* 将 Canvas 转为图片 */
-        const canvas = document.getElementById('pa-chart');
-        let chartImg = '';
-        try { chartImg = canvas.toDataURL('image/png'); } catch (e) { /* 忽略 */ }
-
-        const now = new Date().toLocaleString('zh-CN');
-        const role = Auth.isAdmin() ? '管理员' : '客户经理';
-
-        /* 构建打印区域 HTML */
-        const html = `
-            <div class="print-title">一户一策调价计算报告</div>
-            <div class="print-time">导出时间：${now}　　操作角色：${role}</div>
-            <div class="print-section">
-                <div class="print-section-title">输入参数</div>
-                <div class="print-grid">
-                    <div class="print-item"><span class="print-item-label">客户类型：</span><span class="print-item-value">${result.customerType === 'Y' ? '520客户' : '非520客户'}</span></div>
-                    <div class="print-item"><span class="print-item-label">当前价格：</span><span class="print-item-value">${result.currentPrice.toFixed(2)}%</span></div>
-                    <div class="print-item"><span class="print-item-label">当前风险成本：</span><span class="print-item-value">${result.riskCost.toFixed(2)}%</span></div>
-                    <div class="print-item"><span class="print-item-label">近3个月长周期余额：</span><span class="print-item-value">${result.avgBalance.toFixed(2)} 万元</span></div>
-                    <div class="print-item"><span class="print-item-label">目标价格：</span><span class="print-item-value">${result.targetPrice.toFixed(2)}%</span></div>
-                    <div class="print-item"><span class="print-item-label">当前可用额度：</span><span class="print-item-value">${result.availableLimit.toFixed(2)} 万元</span></div>
-                    <div class="print-item"><span class="print-item-label">预计用款天数：</span><span class="print-item-value">${result.expectedDays} 天</span></div>
-                    <div class="print-item"><span class="print-item-label">兜底价格：</span><span class="print-item-value">${result.bottomPrice.toFixed(2)}%</span></div>
-                </div>
-            </div>
-            <div class="print-section">
-                <div class="print-section-title">计算结果</div>
-                <div class="print-results">
-                    <div class="print-result-box">
-                        <div class="print-result-label">对应3个月长周期目标余额</div>
-                        <div class="print-result-value">${result.targetBalance3Month.toFixed(2)} 万元</div>
-                    </div>
-                    <div class="print-result-box">
-                        <div class="print-result-label">日均需提额余额</div>
-                        <div class="print-result-value">${(result.dailyIncreaseBalance >= 0 ? '+' : '') + result.dailyIncreaseBalance.toFixed(2)} 万元</div>
-                    </div>
-                    <div class="print-result-box">
-                        <div class="print-result-label">对应用款天数目标余额</div>
-                        <div class="print-result-value">${result.targetBalanceByDays.toFixed(2)} 万元</div>
-                    </div>
-                </div>
-            </div>
-            ${chartImg ? `
-            <div class="print-section">
-                <div class="print-section-title">价格-余额曲线图</div>
-                <div class="print-chart"><img src="${chartImg}" alt="曲线图"></div>
-            </div>` : ''}
-            <div class="print-footer">本报告由一户一策业务工具台生成，仅供内部参考</div>
-        `;
-        document.getElementById('print-area').innerHTML = html;
-        /* 延迟调用打印，确保 DOM 渲染完成 */
-        setTimeout(() => window.print(), 200);
+        PrintService.exportPNG('pa-two-col', '一户一策调价计算报告');
     }
 
     return { printPDF };
@@ -3025,7 +2978,40 @@ const PrintService = (() => {
         setTimeout(() => window.print(), 200);
     }
 
-    return { print };
+    /**
+     * 导出指定元素为 PNG 图片（使用 html2canvas 截图）
+     * @param {string} elementId - 要截图的元素 ID
+     * @param {string} filename - 下载文件名（不含扩展名）
+     */
+    function exportPNG(elementId, filename) {
+        const el = document.getElementById(elementId);
+        if (!el) { alert('未找到可导出的元素'); return; }
+
+        // 临时设置白色背景，避免截图时背景透明
+        const origBg = el.style.background;
+        el.style.background = '#fff';
+
+        html2canvas(el, {
+            scale: 2,              // 2倍清晰度
+            useCORS: true,         // 允许跨域图片
+            backgroundColor: '#ffffff',
+            logging: false         // 关闭日志输出
+        }).then(canvas => {
+            // 恢复原始背景
+            el.style.background = origBg;
+
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            el.style.background = origBg;
+            alert('导出失败：' + err.message);
+        });
+    }
+
+    return { print, exportPNG };
 })();
 
 /* ============================================================
@@ -3035,34 +3021,7 @@ const ExportFixedTerm = (() => {
     function printPDF() {
         const result = ToolFixedTerm.getLastResult();
         if (!result) { alert('请先完成一次有效计算'); return; }
-
-        PrintService.print({
-            title: '承兑-定期方案测算报告',
-            chartCanvasId: 'ft-chart',
-            inputItems: [
-                { label: '方案B保证金比例', value: `${result.ratioB.toFixed(0)}%` },
-                { label: '方案B活期/定期', value: result.depositB },
-                { label: '方案B开票周期', value: `${result.cycleB} 月` },
-                { label: '方案B开票金额', value: `${result.amountB.toFixed(2)} 万` },
-                { label: '方案A保证金比例', value: `${result.ratioA.toFixed(0)}%` },
-                { label: '方案A活期/定期', value: result.depositA },
-                { label: '方案A开票周期', value: `${result.cycleA} 月` },
-                { label: '方案A开票金额', value: `${result.amountA.toFixed(2)} 万` }
-            ],
-            resultItems: [
-                { label: '方案B单票收益', value: formatWan(result.revenueB) },
-                { label: '方案A单票收益', value: formatWan(result.revenueA) },
-                { label: '收益差异(B-A)', value: `${result.diff >= 0 ? '+' : ''}${formatWan(result.diff)}` }
-            ],
-            detailItems: [
-                { label: '方案B最低贷款定价', value: formatPercent(result.minPriceB) },
-                { label: '方案A最低贷款定价', value: formatPercent(result.minPriceA) },
-                { label: '方案B保证金收益率', value: formatPercent(result.spreadB) },
-                { label: '方案A保证金收益率', value: formatPercent(result.spreadA) },
-                { label: 'Breakeven开票金额', value: isNaN(result.beAmount) ? '--' : formatWan(result.beAmount) },
-                { label: 'Breakeven保证金比例', value: isNaN(result.beRatio) ? '--' : formatPercent(result.beRatio) }
-            ]
-        });
+        PrintService.exportPNG('ft-result-area', '承兑-定期方案测算报告');
     }
 
     return { printPDF };
@@ -3075,28 +3034,7 @@ const ExportBreakeven = (() => {
     function printPDF() {
         const result = ToolBreakeven.getLastResult();
         if (!result) { alert('请先完成一次有效计算'); return; }
-
-        PrintService.print({
-            title: '承兑-收益打平测算报告',
-            chartCanvasId: 'be-chart',
-            inputItems: [
-                { label: '当前生效保证金比例', value: `${result.currentRatioP.toFixed(0)}%` },
-                { label: '目标保证金比例', value: `${result.targetRatioP.toFixed(0)}%` },
-                { label: '活期/定期', value: result.depositType },
-                { label: '过去三个月均敞口金额', value: `${result.avgExposure.toFixed(2)} 万` },
-                { label: '过去三个月均保证金金额', value: `${result.avgMargin.toFixed(2)} 万` },
-                { label: '过去三个月贷款日均额占', value: `${result.loanRatioP.toFixed(0)}%` }
-            ],
-            resultItems: [
-                { label: '未来三个月均开票金额', value: `${result.futureAmount.toFixed(2)} 万` },
-                { label: '未来三个月需提升开票金额', value: `${result.increase >= 0 ? '+' : ''}${result.increase.toFixed(2)} 万` },
-                { label: '保证金收益率', value: formatPercent(result.spread) }
-            ],
-            detailItems: [
-                { label: '当前保证金比例对应价格', value: formatPercent(result.currentPrice) },
-                { label: '图表口径', value: '固定使用活期净FTP收益率(B5)' }
-            ]
-        });
+        PrintService.exportPNG('be-two-col', '承兑-收益打平测算报告');
     }
 
     return { printPDF };
