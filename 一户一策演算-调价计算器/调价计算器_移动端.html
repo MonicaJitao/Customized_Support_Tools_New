@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>一户一策演算-调价计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header {
+            background: #1890ff;
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: #1890ff;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .radio-item {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-item.active {
+            border-color: #1890ff;
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .calculate-btn:active {
+            background: #096dd9;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-main {
+            text-align: center;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border: 2px solid #1890ff;
+            margin-bottom: 16px;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1890ff;
+            margin: 8px 0;
+        }
+
+        .result-unit {
+            font-size: 16px;
+            color: #999;
+        }
+
+        .result-secondary {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .result-item-small {
+            flex: 1;
+            text-align: center;
+            padding: 16px 12px;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+
+        .result-label-small {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .result-value-small {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-detail {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e8e8e8;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .detail-label {
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .chart-container {
+            margin-top: 16px;
+            height: 250px;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .alert-warning {
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+            color: #fa8c16;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-warning.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>一户一策演算-调价计算器</h1>
+    </div>
+
+    <div class="container">
+        <!-- 参数配置 -->
+        <div class="card">
+            <div class="card-title">客户类型</div>
+
+            <div class="form-group">
+                <div class="radio-group">
+                    <div class="radio-item active" onclick="selectCustomerType('Y')">520客户</div>
+                    <div class="radio-item" onclick="selectCustomerType('N')">非520客户</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 计算输入 -->
+        <div class="card">
+            <div class="card-title">计算参数</div>
+
+            <div class="form-group">
+                <label class="form-label">当前价格 (%)</label>
+                <input type="number" class="form-input" id="currentPrice" placeholder="请输入" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">当前风险成本 (%)</label>
+                <input type="number" class="form-input" id="riskCost" placeholder="请输入" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">近3个月长周期余额 (万元)</label>
+                <input type="number" class="form-input" id="avgBalance" placeholder="请输入" step="1" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">目标价格 (%)</label>
+                <input type="number" class="form-input" id="targetPrice" placeholder="请输入" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">当前可用额度 (万元)</label>
+                <input type="number" class="form-input" id="availableLimit" placeholder="请输入" step="1" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">预计用款天数 (天)</label>
+                <input type="number" class="form-input" id="expectedDays" placeholder="请输入" step="1" min="0">
+            </div>
+
+            <button class="calculate-btn" onclick="calculate()">计算目标余额</button>
+        </div>
+
+        <!-- 警告提示 -->
+        <div class="card alert-warning" id="warningAlert"></div>
+
+        <!-- 计算结果 -->
+        <div class="result-card" id="resultCard">
+            <div class="result-main">
+                <div class="result-label">对应3个月长周期目标余额</div>
+                <div class="result-value" id="resultValue1">--</div>
+                <div class="result-unit">万元</div>
+            </div>
+
+            <div class="result-secondary">
+                <div class="result-item-small">
+                    <div class="result-label-small">日均需提额余额</div>
+                    <div class="result-value-small" id="resultValue2">--</div>
+                </div>
+                <div class="result-item-small">
+                    <div class="result-label-small">对应用款天数目标余额</div>
+                    <div class="result-value-small" id="resultValue3">--</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customerType = 'Y';
+
+        function selectCustomerType(type) {
+            customerType = type;
+            document.querySelectorAll('.radio-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function getConfig() {
+            const config = JSON.parse(localStorage.getItem('priceAdjustConfig') || 'null');
+            return config || { fxcb: 3.54, profitBp: 101, bottomPrice520: 4.55, bottomPriceNon520Min: 4.55 };
+        }
+
+        function calculate() {
+            const config = getConfig();
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+            const riskCost = parseFloat(document.getElementById('riskCost').value);
+            const avgBalance = parseFloat(document.getElementById('avgBalance').value);
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+            const availableLimit = parseFloat(document.getElementById('availableLimit').value);
+            const expectedDays = parseFloat(document.getElementById('expectedDays').value);
+
+            // Hide warning
+            document.getElementById('warningAlert').classList.remove('show');
+
+            if (isNaN(currentPrice) || isNaN(riskCost) || isNaN(avgBalance) || isNaN(targetPrice) || isNaN(availableLimit) || isNaN(expectedDays)) {
+                showWarning('请填写所有必填项');
+                return;
+            }
+
+            // Calculate bottom price based on new logic
+            let bottomPrice;
+            if (customerType === 'Y') {
+                // 520客户：固定兜底价格
+                bottomPrice = config.bottomPrice520;
+            } else {
+                // 非520客户：max(业务成本 + 风险成本, 非520客户兜底价格下限)
+                bottomPrice = Math.max(config.fxcb + riskCost, config.bottomPriceNon520Min || 4.55);
+            }
+
+            if (currentPrice <= bottomPrice) {
+                showWarning('当前价格必须大于兜底价格 (' + bottomPrice.toFixed(2) + '%)');
+                return;
+            }
+
+            // Check if target price is too low
+            if (targetPrice <= bottomPrice) {
+                // Show warning but continue with calculation
+                showWarning('⚠️ 目标价格低于兜底价格 (' + bottomPrice.toFixed(2) + '%)');
+
+                // Display special message for low price
+                document.getElementById('resultValue1').textContent = '价格过低请调整或升级审批';
+                document.getElementById('resultValue1').style.fontSize = '18px';
+                document.getElementById('resultValue2').textContent = '-';
+                document.getElementById('resultValue3').textContent = '-';
+
+                document.getElementById('resultCard').classList.add('show');
+
+                // Clear chart
+                const canvas = document.getElementById('chartCanvas');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            // Calculate three results
+            const targetBalance3Month = (currentPrice - bottomPrice) * avgBalance / (targetPrice - bottomPrice);
+            const dailyIncreaseBalance = targetBalance3Month - avgBalance;
+            const targetBalanceByDays = (90 / expectedDays) * targetBalance3Month;
+
+            // Display results
+            document.getElementById('resultValue1').textContent = targetBalance3Month.toFixed(2);
+            document.getElementById('resultValue1').style.fontSize = '42px';
+            document.getElementById('resultValue2').textContent = (dailyIncreaseBalance >= 0 ? '+' : '') + dailyIncreaseBalance.toFixed(2) + ' 万元';
+            document.getElementById('resultValue3').textContent = targetBalanceByDays.toFixed(2) + ' 万元';
+
+            document.getElementById('resultCard').classList.add('show');
+
+            drawChart(currentPrice, bottomPrice, avgBalance, targetPrice, targetBalance3Month);
+        }
+
+        function showWarning(message) {
+            const alert = document.getElementById('warningAlert');
+            alert.textContent = message;
+            alert.classList.add('show');
+            // Scroll to warning
+            alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function drawChart(currentPrice, bottomPrice, avgBalance, targetPrice, targetBalance) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Generate data points
+            const data = [];
+            const startPrice = bottomPrice + 0.01;
+            const endPrice = Math.max(currentPrice + 1, targetPrice + 1);
+            const step = 0.05;
+
+            for (let price = startPrice; price <= endPrice; price += step) {
+                const balance = (currentPrice - bottomPrice) * avgBalance / (price - bottomPrice);
+                if (balance > 0 && balance < 3000) {
+                    data.push({ price, balance });
+                }
+            }
+
+            if (data.length === 0) return;
+
+            const minPrice = Math.min(...data.map(d => d.price));
+            const maxPrice = Math.max(...data.map(d => d.price));
+            const minBalance = 0;
+            const maxBalance = Math.max(...data.map(d => d.balance)) * 1.15;
+
+            const padding = 45;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+
+            const xScale = (price) => padding + (price - minPrice) / (maxPrice - minPrice) * chartWidth;
+            const yScale = (balance) => height - padding - (balance - minBalance) / (maxBalance - minBalance) * chartHeight;
+
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+
+            // Draw Y-axis labels (balance)
+            ctx.font = '10px sans-serif';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const balance = minBalance + (maxBalance - minBalance) * (4 - i) / 4;
+                const y = padding + (chartHeight / 4) * i;
+                ctx.fillText(balance.toFixed(0), padding - 5, y + 3);
+            }
+
+            // Draw X-axis labels (price)
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 4; i++) {
+                const price = minPrice + (maxPrice - minPrice) * i / 4;
+                const x = padding + (chartWidth / 4) * i;
+                ctx.fillText(price.toFixed(1), x, height - padding + 15);
+            }
+
+            // Draw curve
+            ctx.strokeStyle = '#1890ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            data.forEach((point, index) => {
+                const x = xScale(point.price);
+                const y = yScale(point.balance);
+                index === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Draw current point
+            ctx.fillStyle = '#52c41a';
+            ctx.beginPath();
+            ctx.arc(xScale(currentPrice), yScale(avgBalance), 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw target point
+            ctx.fillStyle = '#ff4d4f';
+            ctx.beginPath();
+            ctx.arc(xScale(targetPrice), yScale(targetBalance), 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw data labels for points
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#52c41a';
+            ctx.fillText(avgBalance.toFixed(0), xScale(currentPrice), yScale(avgBalance) - 10);
+            ctx.fillStyle = '#ff4d4f';
+            ctx.fillText(targetBalance.toFixed(0), xScale(targetPrice), yScale(targetBalance) - 10);
+
+            // Draw axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('价格(%)', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('余额(万元)', 0, 0);
+            ctx.restore();
+
+            // Draw legend
+            ctx.fillStyle = '#52c41a';
+            ctx.textAlign = 'left';
+            ctx.font = '10px sans-serif';
+            ctx.beginPath();
+            ctx.arc(width - 70, 20, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('当前', width - 60, 24);
+            ctx.fillStyle = '#ff4d4f';
+            ctx.beginPath();
+            ctx.arc(width - 70, 35, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('目标', width - 60, 39);
+        }
+    </script>
+</body>
+</html>

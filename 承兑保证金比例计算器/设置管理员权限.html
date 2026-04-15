@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置用户权限</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .role-group {
+            margin-bottom: 24px;
+        }
+
+        .role-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .role-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #d9d9d9;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .role-btn:hover {
+            border-color: #1890ff;
+        }
+
+        .role-btn.active {
+            border-color: #1890ff;
+            background: #e6f7ff;
+        }
+
+        .role-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .role-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .role-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .current-role {
+            background: #f0f0f0;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .current-role strong {
+            color: #1890ff;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-default {
+            background: white;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-default:hover {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        .success-msg {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success-msg.show {
+            display: block;
+        }
+
+        .link-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e8e8e8;
+            text-align: center;
+        }
+
+        .link-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #1890ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .link-btn:hover {
+            background: #40a9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">用户权限设置</div>
+        <div class="subtitle">设置您在承兑保证金比例计算器中的角色</div>
+
+        <div class="current-role">
+            当前角色：<strong id="currentRoleText">未设置</strong>
+        </div>
+
+        <div class="role-group">
+            <label class="role-label">选择您的角色</label>
+            <div class="role-options">
+                <div class="role-btn" id="adminBtn" onclick="selectRole('admin')">
+                    <div class="role-icon">👨‍💼</div>
+                    <div class="role-name">管理员</div>
+                    <div class="role-desc">可配置FTP</div>
+                </div>
+                <div class="role-btn" id="userBtn" onclick="selectRole('user')">
+                    <div class="role-icon">👤</div>
+                    <div class="role-name">普通用户</div>
+                    <div class="role-desc">只能计算</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn btn-primary" onclick="saveRole()">保存并应用</button>
+            <button class="btn btn-default" onclick="clearRole()">清除权限</button>
+        </div>
+
+        <div class="success-msg" id="successMsg">
+            ✓ 权限设置成功！请打开计算器查看效果
+        </div>
+
+        <div class="link-section">
+            <a href="承兑保证金计算器_PC端.html" class="link-btn" target="_blank">
+                打开计算器 →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = null;
+
+        // 页面加载时显示当前角色
+        window.onload = function() {
+            const currentRole = localStorage.getItem('userRole');
+            updateCurrentRoleDisplay(currentRole);
+
+            if (currentRole) {
+                selectedRole = currentRole;
+                document.getElementById(currentRole + 'Btn').classList.add('active');
+            }
+        };
+
+        // 选择角色
+        function selectRole(role) {
+            selectedRole = role;
+
+            // 更新按钮状态
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(role + 'Btn').classList.add('active');
+        }
+
+        // 保存角色
+        function saveRole() {
+            if (!selectedRole) {
+                alert('请先选择一个角色');
+                return;
+            }
+
+            // 保存到localStorage
+            localStorage.setItem('userRole', selectedRole);
+
+            // 更新显示
+            updateCurrentRoleDisplay(selectedRole);
+
+            // 显示成功消息
+            const successMsg = document.getElementById('successMsg');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // 清除权限
+        function clearRole() {
+            if (confirm('确定要清除权限设置吗？')) {
+                localStorage.removeItem('userRole');
+                selectedRole = null;
+
+                // 清除按钮选中状态
+                document.querySelectorAll('.role-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // 更新显示
+                updateCurrentRoleDisplay(null);
+
+                alert('权限已清除');
+            }
+        }
+
+        // 更新当前角色显示
+        function updateCurrentRoleDisplay(role) {
+            const roleText = document.getElementById('currentRoleText');
+            if (role === 'admin') {
+                roleText.textContent = '管理员';
+                roleText.style.color = '#1890ff';
+            } else if (role === 'user') {
+                roleText.textContent = '普通用户';
+                roleText.style.color = '#52c41a';
+            } else {
+                roleText.textContent = '未设置';
+                roleText.style.color = '#999';
+            }
+        }
+    </script>
+</body>
+</html>

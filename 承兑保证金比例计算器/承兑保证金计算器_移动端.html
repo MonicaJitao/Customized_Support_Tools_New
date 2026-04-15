@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>承兑保证金比例计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header {
+            background: #1890ff;
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        .tab-container {
+            display: flex;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            font-weight: 500;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #1890ff;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .calculate-btn:active {
+            background: #096dd9;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: 600;
+            color: #1890ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>承兑保证金比例计算器</h1>
+    </div>
+
+    <div class="container">
+        <div class="tab-container">
+            <div class="tab active" onclick="switchMode('mode1')">价格→保证金</div>
+            <div class="tab" onclick="switchMode('mode2')">保证金→价格</div>
+        </div>
+
+        <!-- 模式1: 通过价格计算保证金比例 -->
+        <div id="mode1" class="mode-content active">
+            <div class="form-card">
+                <div class="form-group">
+                    <label class="form-label">应用FTP (%)</label>
+                    <input type="number" class="form-input" id="ftp1" value="2.13" step="0.01" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">目标锚定价格 (%)</label>
+                    <input type="number" class="form-input" id="targetPrice" placeholder="请输入目标价格" step="0.01" min="0">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateMode1()">计算保证金比例</button>
+            </div>
+        </div>
+
+        <!-- 模式2: 通过保证金比例计算价格 -->
+        <div id="mode2" class="mode-content">
+            <div class="form-card">
+                <div class="form-group">
+                    <label class="form-label">应用FTP (%)</label>
+                    <input type="number" class="form-input" id="ftp2" value="2.13" step="0.01" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">目标保证金比例 (%)</label>
+                    <input type="number" class="form-input" id="targetRatio" placeholder="请输入保证金比例" step="1" min="0" max="100">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateMode2()">计算最低价格</button>
+            </div>
+        </div>
+
+        <!-- 结果展示 -->
+        <div class="result-card" id="resultCard">
+            <div class="result-label" id="resultLabel">计算结果</div>
+            <div class="result-value" id="resultValue">--</div>
+        </div>
+    </div>
+
+    <script>
+        // 切换计算模式
+        function switchMode(mode) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(mode).classList.add('active');
+
+            document.getElementById('resultCard').classList.remove('show');
+        }
+
+        // 模式1: 通过目标锚定价格计算0手续费保证金比例
+        function calculateMode1() {
+            const ftp = parseFloat(document.getElementById('ftp1').value);
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+
+            if (isNaN(ftp) || ftp <= 0) {
+                alert('请输入有效的FTP值');
+                return;
+            }
+            if (isNaN(targetPrice) || targetPrice <= 0) {
+                alert('请输入有效的目标价格');
+                return;
+            }
+            if (targetPrice <= ftp) {
+                alert('目标价格必须大于FTP');
+                return;
+            }
+
+            const priceDiff = targetPrice - ftp;
+            const ratio = priceDiff / targetPrice;
+            const marginRatio = Math.ceil(ratio * 100) / 100;
+
+            document.getElementById('resultLabel').textContent = '0手续费保证金比例';
+            document.getElementById('resultValue').textContent = (marginRatio * 100).toFixed(0) + '%';
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        // 模式2: 通过目标保证金比例计算对应最低价格
+        function calculateMode2() {
+            const ftp = parseFloat(document.getElementById('ftp2').value);
+            const targetRatioPercent = parseFloat(document.getElementById('targetRatio').value);
+
+            if (isNaN(ftp) || ftp <= 0) {
+                alert('请输入有效的FTP值');
+                return;
+            }
+            if (isNaN(targetRatioPercent) || targetRatioPercent <= 0 || targetRatioPercent >= 100) {
+                alert('请输入有效的保证金比例（0-100之间）');
+                return;
+            }
+
+            const targetRatio = targetRatioPercent / 100;
+            const basePrice = (ftp * targetRatio) / (1 - targetRatio);
+            const roundedBase = Math.floor(basePrice * 100) / 100;
+            const minPrice = roundedBase + ftp;
+
+            document.getElementById('resultLabel').textContent = '对应最低价格';
+            document.getElementById('resultValue').textContent = minPrice.toFixed(2) + '%';
+            document.getElementById('resultCard').classList.add('show');
+        }
+    </script>
+</body>
+</html>

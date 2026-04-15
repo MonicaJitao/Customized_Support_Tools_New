@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调价计算器参数配置</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f5f7fa; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .page-header { background: white; padding: 24px 32px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+        .page-title { font-size: 20px; font-weight: 500; color: #333; }
+        .content-card { background: white; border-radius: 8px; padding: 32px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+        .section-title { font-size: 16px; font-weight: 500; color: #333; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #e8e8e8; }
+        .form-row { display: flex; align-items: center; margin-bottom: 24px; }
+        .form-label { width: 200px; font-size: 14px; color: #666; font-weight: 500; }
+        .form-label .required { color: #ff4d4f; margin-right: 4px; }
+        .form-control { flex: 1; max-width: 400px; }
+        .form-input { width: 100%; padding: 10px 16px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px; transition: all 0.3s; outline: none; }
+        .form-input:hover { border-color: #40a9ff; }
+        .form-input:focus { border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2); }
+        .input-suffix { margin-left: 8px; color: #999; font-size: 14px; }
+        .form-help { margin-top: 8px; font-size: 12px; color: #999; line-height: 1.5; }
+        .button-group { display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e8e8e8; }
+        .btn { padding: 10px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.3s; font-weight: 500; }
+        .btn-primary { background: #1890ff; color: white; }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-default { background: white; color: #666; border: 1px solid #d9d9d9; }
+        .btn-default:hover { color: #1890ff; border-color: #1890ff; }
+        .alert { padding: 12px 16px; border-radius: 4px; margin-bottom: 24px; font-size: 14px; display: none; }
+        .alert-success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; }
+        .alert.show { display: block; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .history-section { margin-top: 32px; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .history-table th { background: #fafafa; padding: 12px 16px; text-align: left; font-size: 14px; font-weight: 600; color: #333; border-bottom: 1px solid #e8e8e8; }
+        .history-table td { padding: 12px 16px; font-size: 14px; color: #666; border-bottom: 1px solid #f0f0f0; }
+        .history-table tr:hover { background: #fafafa; }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; }
+        .status-active { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-inactive { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .action-link { color: #1890ff; cursor: pointer; margin-right: 12px; }
+        .action-link:hover { color: #40a9ff; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">调价计算器参数配置</div>
+        </div>
+
+        <div class="content-card">
+            <div class="alert alert-success" id="successAlert">
+                <strong>✓ 保存成功！</strong> 参数配置已更新
+            </div>
+
+            <div class="section-title">参数配置</div>
+
+            <form id="configForm">
+                <div class="form-row">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        业务成本
+                    </label>
+                    <div class="form-control">
+                        <div style="display: flex; align-items: center;">
+                            <input type="number" class="form-input" id="fxcb" step="0.01" min="0" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                        <div class="form-help">资金成本，建议范围：2.00% - 5.00%</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        计提利润点
+                    </label>
+                    <div class="form-control">
+                        <div style="display: flex; align-items: center;">
+                            <input type="number" class="form-input" id="profitBp" step="1" min="0" required>
+                            <span class="input-suffix">bp</span>
+                        </div>
+                        <div class="form-help">利润点数，1bp = 0.01%，建议范围：50bp - 200bp</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        520客户兜底价格
+                    </label>
+                    <div class="form-control">
+                        <div style="display: flex; align-items: center;">
+                            <input type="number" class="form-input" id="bottomPrice520" step="0.01" min="0" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                        <div class="form-help">520客户的固定兜底价格</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        非520客户兜底价格下限
+                    </label>
+                    <div class="form-control">
+                        <div style="display: flex; align-items: center;">
+                            <input type="number" class="form-input" id="bottomPriceNon520Min" step="0.01" min="0" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                        <div class="form-help">非520客户兜底价格的最低限制</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">非520客户兜底价格</label>
+                    <div class="form-control">
+                        <div style="padding: 10px 16px; background: #f5f7fa; border-radius: 4px; color: #666; font-size: 14px;">
+                            max(业务成本 + 风险成本, 非520客户兜底价格下限)
+                        </div>
+                        <div class="form-help">非520客户兜底价格 = max(业务成本 + 风险成本, 非520客户兜底价格下限)，由系统自动计算</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">生效日期</label>
+                    <div class="form-control">
+                        <input type="date" class="form-input" id="effectiveDate" required>
+                        <div class="form-help">参数配置的生效日期</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">备注说明</label>
+                    <div class="form-control">
+                        <input type="text" class="form-input" id="remarks" placeholder="选填：如调整原因等">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">保存配置</button>
+                    <button type="button" class="btn btn-default" onclick="resetForm()">重置</button>
+                    <button type="button" class="btn btn-default" onclick="exportConfig()">导出配置</button>
+                </div>
+            </form>
+
+            <div class="history-section">
+                <div class="section-title">历史配置记录</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>生效日期</th>
+                            <th>业务成本</th>
+                            <th>计提利润点</th>
+                            <th>520兜底价格</th>
+                            <th>非520兜底价格下限</th>
+                            <th>非520兜底价格</th>
+                            <th>状态</th>
+                            <th>备注</th>
+                            <th>操作时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- 历史记录动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('effectiveDate').value = today;
+            loadCurrentConfig();
+            loadHistory();
+        });
+
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConfig();
+        });
+
+        function saveConfig() {
+            const fxcb = parseFloat(document.getElementById('fxcb').value);
+            const profitBp = parseFloat(document.getElementById('profitBp').value);
+            const bottomPrice520 = parseFloat(document.getElementById('bottomPrice520').value);
+            const bottomPriceNon520Min = parseFloat(document.getElementById('bottomPriceNon520Min').value);
+            const effectiveDate = document.getElementById('effectiveDate').value;
+            const remarks = document.getElementById('remarks').value;
+
+            if (isNaN(fxcb) || fxcb <= 0) { alert('请输入有效的业务成本'); return; }
+            if (isNaN(profitBp) || profitBp <= 0) { alert('请输入有效的计提利润点'); return; }
+            if (isNaN(bottomPrice520) || bottomPrice520 <= 0) { alert('请输入有效的520客户兜底价格'); return; }
+            if (isNaN(bottomPriceNon520Min) || bottomPriceNon520Min <= 0) { alert('请输入有效的非520客户兜底价格下限'); return; }
+            if (!effectiveDate) { alert('请选择生效日期'); return; }
+
+            const config = {
+                fxcb: fxcb,
+                profitBp: profitBp,
+                bottomPrice520: bottomPrice520,
+                bottomPriceNon520Min: bottomPriceNon520Min,
+                effectiveDate: effectiveDate,
+                remarks: remarks,
+                operator: '当前用户',
+                operateTime: new Date().toISOString(),
+                status: 'active'
+            };
+
+            localStorage.setItem('priceAdjustConfig', JSON.stringify(config));
+
+            let history = JSON.parse(localStorage.getItem('priceAdjustHistory') || '[]');
+            history = history.map(item => ({...item, status: 'inactive'}));
+            history.unshift(config);
+            localStorage.setItem('priceAdjustHistory', JSON.stringify(history));
+
+            showSuccess();
+            loadHistory();
+        }
+
+        function loadCurrentConfig() {
+            const config = JSON.parse(localStorage.getItem('priceAdjustConfig') || 'null');
+            if (config) {
+                document.getElementById('fxcb').value = config.fxcb;
+                document.getElementById('profitBp').value = config.profitBp;
+                document.getElementById('bottomPrice520').value = config.bottomPrice520 || config.bottomPrice || 4.55;
+                document.getElementById('bottomPriceNon520Min').value = config.bottomPriceNon520Min || 4.55;
+                document.getElementById('effectiveDate').value = config.effectiveDate;
+                document.getElementById('remarks').value = config.remarks || '';
+            } else {
+                document.getElementById('fxcb').value = '3.54';
+                document.getElementById('profitBp').value = '101';
+                document.getElementById('bottomPrice520').value = '4.55';
+                document.getElementById('bottomPriceNon520Min').value = '4.55';
+            }
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('priceAdjustHistory') || '[]');
+            const tbody = document.getElementById('historyTableBody');
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">暂无历史记录</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map((item, index) => `
+                <tr>
+                    <td>${item.effectiveDate}</td>
+                    <td><strong>${item.fxcb.toFixed(2)}%</strong></td>
+                    <td><strong>${item.profitBp}bp</strong></td>
+                    <td><strong>${(item.bottomPrice520 || item.bottomPrice || 4.55).toFixed(2)}%</strong></td>
+                    <td><strong>${(item.bottomPriceNon520Min || 4.55).toFixed(2)}%</strong></td>
+                    <td>max(${item.fxcb.toFixed(2)}% + 风险成本, ${(item.bottomPriceNon520Min || 4.55).toFixed(2)}%)</td>
+                    <td>
+                        <span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${item.status === 'active' ? '当前生效' : '已失效'}
+                        </span>
+                    </td>
+                    <td>${item.remarks || '-'}</td>
+                    <td>${formatDateTime(item.operateTime)}</td>
+                    <td>
+                        <span class="action-link" onclick="applyHistory(${index})">应用</span>
+                        <span class="action-link" onclick="deleteHistory(${index})">删除</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function applyHistory(index) {
+            const history = JSON.parse(localStorage.getItem('priceAdjustHistory') || '[]');
+            const config = history[index];
+            document.getElementById('fxcb').value = config.fxcb;
+            document.getElementById('profitBp').value = config.profitBp;
+            document.getElementById('bottomPrice520').value = config.bottomPrice520 || config.bottomPrice || 4.55;
+            document.getElementById('bottomPriceNon520Min').value = config.bottomPriceNon520Min || 4.55;
+            document.getElementById('effectiveDate').value = config.effectiveDate;
+            document.getElementById('remarks').value = config.remarks || '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteHistory(index) {
+            if (!confirm('确定要删除这条历史记录吗？')) return;
+            let history = JSON.parse(localStorage.getItem('priceAdjustHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('priceAdjustHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function resetForm() {
+            document.getElementById('configForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('effectiveDate').value = today;
+            loadCurrentConfig();
+        }
+
+        function exportConfig() {
+            const config = JSON.parse(localStorage.getItem('priceAdjustConfig') || 'null');
+            if (!config) { alert('暂无配置可导出'); return; }
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `调价计算器参数配置_${config.effectiveDate}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showSuccess() {
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function getCurrentConfig() {
+            const config = JSON.parse(localStorage.getItem('priceAdjustConfig') || 'null');
+            return config || { fxcb: 3.54, profitBp: 101, bottomPrice520: 4.55, bottomPriceNon520Min: 4.55 };
+        }
+
+        window.getCurrentConfig = getCurrentConfig;
+    </script>
+</body>
+</html>

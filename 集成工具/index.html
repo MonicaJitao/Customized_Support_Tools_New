@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一户一策 · 业务工具台</title>
+    <style>
+/* ============================================================
+   CSS 变量 — 金融终端色彩体系
+   ============================================================ */
+:root {
+    --navy:        #0D1B2A;
+    --navy-light:  #162236;
+    --gold:        #C9A84C;
+    --gold-light:  #E8C97A;
+    --ivory:       #F7F4EE;
+    --white:       #FFFFFF;
+    --ink:         #1A1A2E;
+    --ink-mid:     #4A4A6A;
+    --ink-light:   #8A8AAA;
+    --border:      #E8E4DC;
+    --success:     #2D7D46;
+    --danger:      #C0392B;
+    --warning:     #B7791F;
+    --chart-curve: #2C5F8A;
+    /* 字体栈：离线可用，不依赖外网 */
+    --font-stack: "Microsoft YaHei","PingFang SC","Noto Sans CJK SC","Segoe UI",sans-serif;
+}
+
+/* ============================================================
+   全局重置
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font-family: var(--font-stack);
+    background: var(--ivory);
+    color: var(--ink);
+    overflow: hidden;          /* 由各屏幕自行控制滚动 */
+}
+input, button, select, textarea { font-family: inherit; }
+
+/* ============================================================
+   屏幕 1：登录页
+   ============================================================ */
+#screen-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--navy) 0%, #1a2d45 100%);
+}
+/* 登录卡片 */
+.login-card {
+    width: 380px;
+    background: var(--white);
+    border-radius: 8px;
+    padding: 48px 36px 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    text-align: center;
+    animation: loginEnter 400ms ease-out;
+}
+@keyframes loginEnter {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.login-card.shake {
+    animation: loginShake 300ms ease-in-out;
+}
+@keyframes loginShake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-10px); }
+    40%     { transform: translateX(10px); }
+    60%     { transform: translateX(-6px); }
+    80%     { transform: translateX(6px); }
+}
+.login-brand {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+.login-subtitle {
+    font-size: 12px;
+    color: var(--ink-light);
+    letter-spacing: 1px;
+    margin-bottom: 36px;
+}
+.login-input-wrap { margin-bottom: 12px; }
+.login-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+}
+.login-input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,76,.15); }
+.login-error {
+    display: none;
+    color: var(--danger);
+    font-size: 13px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 4px;
+    transition: background .2s;
+}
+.login-btn:hover { background: var(--gold-light); }
+.login-footer {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--ink-light);
+}
+
+/* ============================================================
+   屏幕 2：主应用页布局
+   ============================================================ */
+#screen-app {
+    display: none;
+    height: 100vh;
+}
+#screen-app.visible {
+    display: flex !important;
+}
+
+/* 左侧导航栏 */
+.sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    z-index: 10;
+}
+.sidebar-brand {
+    padding: 28px 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-brand-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--gold);
+}
+.sidebar-brand-sub {
+    font-size: 11px;
+    color: var(--ink-light);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+}
+.nav-item {
+    padding: 13px 20px;
+    font-size: 13.5px;
+    color: rgba(255,255,255,.6);
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid transparent;
+}
+.nav-item:hover {
+    color: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.04);
+}
+.nav-item.active {
+    color: var(--gold);
+    background: rgba(201,168,76,.08);
+    border-left-color: var(--gold);
+}
+.nav-icon { font-size: 10px; }
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 12px;
+    color: rgba(255,255,255,.45);
+}
+.sidebar-role { margin-bottom: 4px; }
+.sidebar-time { margin-bottom: 12px; }
+.sidebar-logout {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 4px;
+    color: rgba(255,255,255,.6);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+.sidebar-logout:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* 右侧内容区 */
+.main-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+    background: var(--ivory);
+}
+
+/* 内容页切换 */
+.content-page { display: none; }
+.content-page.active {
+    display: block;
+    animation: pageFadeIn 200ms ease-out;
+}
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   通用组件样式
+   ============================================================ */
+/* 页面标题 */
+.page-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* 卡片 */
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* 表单 */
+.form-group { margin-bottom: 18px; }
+.form-label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-mid);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.form-label .required { color: var(--danger); margin-right: 2px; }
+.form-input, .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    background: var(--white);
+    transition: border-color .2s, box-shadow .2s;
+}
+.form-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(201,168,76,.12);
+}
+.form-input:disabled {
+    background: #f5f5f0;
+    cursor: not-allowed;
+    color: var(--ink-mid);
+}
+.form-help {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--ink-light);
+}
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.input-suffix {
+    font-size: 13px;
+    color: var(--ink-light);
+    white-space: nowrap;
+}
+
+/* 按钮 */
+.btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+}
+.btn-primary {
+    background: var(--gold);
+    color: var(--white);
+}
+.btn-primary:hover { background: var(--gold-light); }
+.btn-outline {
+    background: transparent;
+    color: var(--ink-mid);
+    border: 1px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.btn-block { width: 100%; }
+.btn-group { display: flex; gap: 12px; margin-top: 20px; }
+
+/* 单选按钮组 */
+.radio-group { display: flex; gap: 10px; }
+.radio-item {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-mid);
+    transition: all .2s;
+}
+.radio-item.active {
+    border-color: var(--gold);
+    background: rgba(201,168,76,.06);
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* Tab 切换 */
+.tab-bar { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab-item {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink-mid);
+    transition: all .2s;
+}
+.tab-item:hover { color: var(--gold); border-color: var(--gold); }
+.tab-item.active {
+    background: var(--gold);
+    color: var(--white);
+    border-color: var(--gold);
+}
+
+/* 警告提示 */
+.alert-warning {
+    background: #fdf8e8;
+    border: 1px solid var(--gold-light);
+    color: var(--warning);
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    display: none;
+}
+.alert-warning.show { display: block; }
+.alert-success {
+    background: #edf7f0;
+    border: 1px solid #a3d9b1;
+    color: var(--success);
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    display: none;
+}
+.alert-success.show { display: block; animation: slideDown .3s ease-out; }
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 结果展示 */
+.result-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-light);
+}
+.result-empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+.result-display { display: none; }
+.result-display.show { display: block; animation: resultEnter 300ms ease-out; }
+@keyframes resultEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+/* 大结果卡片 */
+.result-hero {
+    text-align: center;
+    padding: 28px;
+    background: linear-gradient(135deg, rgba(13,27,42,.03), rgba(201,168,76,.06));
+    border-radius: 8px;
+    border: 2px solid var(--gold);
+    margin-bottom: 20px;
+}
+.result-hero-label {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+.result-hero-value {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1.1;
+}
+.result-hero-unit {
+    font-size: 16px;
+    color: var(--ink-light);
+    margin-top: 8px;
+}
+/* 中等结果 */
+.result-pair { display: flex; gap: 16px; margin-bottom: 20px; }
+.result-medium {
+    flex: 1;
+    text-align: center;
+    padding: 18px;
+    background: #fafaf6;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+.result-medium-label {
+    font-size: 13px;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+}
+.result-medium-value {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+}
+/* 承兑保证金大结果 */
+.margin-result-display { display: none; text-align: center; padding: 40px 20px; }
+.margin-result-display.show { display: block; animation: resultEnter 300ms ease-out; }
+.margin-result-label { font-size: 14px; color: var(--ink-mid); margin-bottom: 16px; }
+.margin-result-value { font-size: 64px; font-weight: 600; color: var(--gold); letter-spacing: 2px; }
+
+/* 详情摘要 */
+.detail-list { margin-top: 16px; }
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0ede6;
+    font-size: 13px;
+}
+.detail-row-label { color: var(--ink-mid); }
+.detail-row-value { color: var(--ink); font-weight: 500; }
+
+/* 图表容器 */
+.chart-wrap { margin-top: 20px; height: 380px; }
+.chart-wrap canvas { width: 100%; height: 100%; }
+
+/* 两栏布局 */
+.two-col { display: grid; grid-template-columns: 420px 1fr; gap: 24px; }
+
+/* 历史记录表格 */
+.history-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+.history-table th {
+    background: #fafaf6;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border);
+}
+.history-table td {
+    padding: 10px 14px;
+    color: var(--ink-mid);
+    border-bottom: 1px solid #f0ede6;
+}
+.history-table tr:hover td { background: #fdfcf8; }
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+}
+.status-active { background: #edf7f0; color: var(--success); border: 1px solid #a3d9b1; }
+.status-inactive { background: #fdf8e8; color: var(--warning); border: 1px solid var(--gold-light); }
+.action-link {
+    color: var(--chart-curve);
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 12px;
+}
+.action-link:hover { text-decoration: underline; }
+
+/* 配置中心子 Tab */
+.config-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid var(--border); }
+.config-tab {
+    padding: 10px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--ink-mid);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all .2s;
+}
+.config-tab:hover { color: var(--gold); }
+.config-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+.config-panel { display: none; }
+.config-panel.active { display: block; }
+
+/* 表单行（配置中心用） */
+.form-row-inline {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.form-row-inline .form-label-inline {
+    width: 180px;
+    font-size: 13px;
+    color: var(--ink-mid);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.form-row-inline .form-control-inline {
+    flex: 1;
+    max-width: 400px;
+}
+
+/* ============================================================
+   打印样式
+   ============================================================ */
+@media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%;
+        padding: 20px 40px;
+    }
+    @page { size: A4 landscape; margin: 12mm; }
+    .print-title {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 4px;
+        color: #0D1B2A;
+    }
+    .print-time {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 20px;
+    }
+    .print-section { margin-bottom: 16px; }
+    .print-section-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #0D1B2A;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 4px;
+    }
+    .print-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+    }
+    .print-item { font-size: 12px; }
+    .print-item-label { color: #666; }
+    .print-item-value { font-weight: 600; color: #333; }
+    .print-results {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+    }
+    .print-result-box {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .print-result-label { font-size: 11px; color: #666; }
+    .print-result-value { font-size: 22px; font-weight: 700; color: #0D1B2A; }
+    .print-chart { text-align: center; margin-top: 12px; }
+    .print-chart img { max-width: 100%; max-height: 320px; }
+    .print-footer {
+        text-align: center;
+        font-size: 10px;
+        color: #999;
+        margin-top: 16px;
+        border-top: 1px solid #ccc;
+        padding-top: 8px;
+    }
+}
+</style>
+</head>
+<body>
+<!-- ============================================================
+     屏幕 1：登录页
+     ============================================================ -->
+<div id="screen-login">
+    <div class="login-card" id="loginCard">
+        <div class="login-brand">一户一策 · 业务工具台</div>
+        <div class="login-subtitle">Business Workbench</div>
+        <div class="login-form">
+            <div class="login-input-wrap">
+                <input type="password" id="loginPassword" class="login-input" placeholder="请输入访问密码" autocomplete="off">
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <button class="login-btn" id="loginBtn" onclick="Auth.login()">登 录</button>
+        </div>
+        <div class="login-footer">仅限内部授权人员使用</div>
+    </div>
+</div>
+
+<!-- ============================================================
+     屏幕 2：主应用页
+     ============================================================ -->
+<div id="screen-app" style="display:none;">
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-title">一户一策</div>
+            <div class="sidebar-brand-sub">业务工具台</div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-item active" data-page="page-margin" onclick="UI.switchPage('page-margin', this)">
+                <span class="nav-icon">&#9670;</span>承兑保证金比例计算器
+            </div>
+            <div class="nav-item" data-page="page-price" onclick="UI.switchPage('page-price', this)">
+                <span class="nav-icon">&#9670;</span>一户一策调价计算器
+            </div>
+            <div class="nav-item nav-admin-only" data-page="page-config" onclick="UI.switchPage('page-config', this)">
+                <span class="nav-icon">&#9881;</span>参数配置
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="sidebar-role" id="sidebarRole">角色：--</div>
+            <div class="sidebar-time" id="sidebarTime">登录时间：--</div>
+            <button class="sidebar-logout" onclick="Auth.logout()">退出登录</button>
+        </div>
+    </nav>
+
+    <!-- 右侧内容区 -->
+    <main class="main-area" id="mainArea">
+        <!-- ====== 内容区 1：承兑保证金比例计算器 ====== -->
+        <div class="content-page active" id="page-margin">
+            <div class="page-header-bar">
+                <div class="page-title">承兑保证金比例计算器</div>
+            </div>
+            <div class="two-col">
+                <!-- 左侧输入 -->
+                <div class="card">
+                    <div class="card-title">计算参数</div>
+                    <div class="tab-bar">
+                        <div class="tab-item active" onclick="ToolMargin.switchMode('modeA', this)">价格 → 保证金比例</div>
+                        <div class="tab-item" onclick="ToolMargin.switchMode('modeB', this)">保证金比例 → 价格</div>
+                    </div>
+                    <!-- 模式 A -->
+                    <div id="margin-modeA" class="margin-mode active">
+                        <div class="form-group">
+                            <label class="form-label">应用 FTP (%)</label>
+                            <input type="number" class="form-input" id="margin-ftpA" step="0.01" min="0" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">目标锚定价格 (%)</label>
+                            <input type="number" class="form-input" id="margin-targetPrice" placeholder="请输入目标价格" step="0.01" min="0">
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="ToolMargin.calcModeA()">计算保证金比例</button>
+                    </div>
+                    <!-- 模式 B -->
+                    <div id="margin-modeB" class="margin-mode" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">应用 FTP (%)</label>
+                            <input type="number" class="form-input" id="margin-ftpB" step="0.01" min="0" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">目标保证金比例 (%)</label>
+                            <input type="number" class="form-input" id="margin-targetRatio" placeholder="请输入保证金比例" step="1" min="0" max="100">
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="ToolMargin.calcModeB()">计算最低价格</button>
+                    </div>
+                </div>
+                <!-- 右侧结果 -->
+                <div class="card">
+                    <div class="card-title">计算结果</div>
+                    <div class="result-empty" id="margin-empty">
+                        <div class="result-empty-icon">&#9670;</div>
+                        <div>请在左侧输入参数并点击计算</div>
+                    </div>
+                    <div class="margin-result-display" id="margin-result">
+                        <div class="margin-result-label" id="margin-result-label">计算结果</div>
+                        <div class="margin-result-value" id="margin-result-value">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== 内容区 2：一户一策调价计算器 ====== -->
+        <div class="content-page" id="page-price">
+            <div class="page-header-bar">
+                <div class="page-title">一户一策调价计算器</div>
+                <button class="btn btn-outline" id="exportPdfBtn" style="display:none;" onclick="Export.printPDF()">导出 PDF</button>
+            </div>
+            <div class="two-col">
+                <!-- 左侧输入 -->
+                <div class="card">
+                    <div class="card-title">参数配置与计算</div>
+                    <div class="form-group">
+                        <label class="form-label">客户类型</label>
+                        <div class="radio-group">
+                            <div class="radio-item active" id="pa-typeY" onclick="ToolPriceAdjust.selectType('Y')">520客户</div>
+                            <div class="radio-item" id="pa-typeN" onclick="ToolPriceAdjust.selectType('N')">非520客户</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">当前价格 (%)</label>
+                        <input type="number" class="form-input" id="pa-currentPrice" placeholder="请输入" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">当前风险成本 (%)</label>
+                        <input type="number" class="form-input" id="pa-riskCost" placeholder="请输入" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">近3个月长周期余额 (万元)</label>
+                        <input type="number" class="form-input" id="pa-avgBalance" placeholder="请输入" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标价格 (%)</label>
+                        <input type="number" class="form-input" id="pa-targetPrice" placeholder="请输入" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">当前可用额度 (万元)</label>
+                        <input type="number" class="form-input" id="pa-availableLimit" placeholder="请输入" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">预计用款天数 (天)</label>
+                        <input type="number" class="form-input" id="pa-expectedDays" placeholder="请输入" step="1">
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="ToolPriceAdjust.calculate()">计算目标额度</button>
+                </div>
+                <!-- 右侧结果 -->
+                <div class="card">
+                    <div class="card-title">计算结果</div>
+                    <div class="alert-warning" id="pa-warning"></div>
+                    <div class="result-empty" id="pa-empty">
+                        <div class="result-empty-icon">&#9670;</div>
+                        <div>请在左侧输入参数并点击计算</div>
+                    </div>
+                    <div class="result-display" id="pa-result">
+                        <div class="result-hero">
+                            <div class="result-hero-label">对应3个月长周期目标余额</div>
+                            <div class="result-hero-value" id="pa-val1">--</div>
+                            <div class="result-hero-unit">万元</div>
+                        </div>
+                        <div class="result-pair">
+                            <div class="result-medium">
+                                <div class="result-medium-label">日均需提额余额</div>
+                                <div class="result-medium-value" id="pa-val2">--</div>
+                            </div>
+                            <div class="result-medium">
+                                <div class="result-medium-label">对应用款天数目标余额</div>
+                                <div class="result-medium-value" id="pa-val3">--</div>
+                            </div>
+                        </div>
+                        <div class="detail-list">
+                            <div class="detail-row"><span class="detail-row-label">客户类型</span><span class="detail-row-value" id="pa-detailType">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">当前价格</span><span class="detail-row-value" id="pa-detailCurrent">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">目标价格</span><span class="detail-row-value" id="pa-detailTarget">--</span></div>
+                            <div class="detail-row"><span class="detail-row-label">兜底价格</span><span class="detail-row-value" id="pa-detailBottom">--</span></div>
+                        </div>
+                        <div class="chart-wrap"><canvas id="pa-chart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== 内容区 3：参数配置中心（仅管理员） ====== -->
+        <div class="content-page" id="page-config">
+            <div class="page-header-bar">
+                <div class="page-title">参数配置中心</div>
+            </div>
+            <div class="config-tabs">
+                <div class="config-tab active" onclick="ConfigPanel.switchTab('cfg-ftp', this)">FTP 配置</div>
+                <div class="config-tab" onclick="ConfigPanel.switchTab('cfg-price', this)">调价参数</div>
+            </div>
+
+            <!-- FTP 配置面板 -->
+            <div class="config-panel active" id="cfg-ftp">
+                <div class="card">
+                    <div class="alert-success" id="ftp-success">保存成功！FTP 配置已更新</div>
+                    <div class="card-title">FTP 配置</div>
+                    <form id="ftpForm" onsubmit="ConfigPanel.saveFTP(event)">
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 应用 FTP 值</label>
+                            <div class="form-control-inline">
+                                <div class="input-row">
+                                    <input type="number" class="form-input" id="cfg-ftpValue" step="0.01" min="0" max="10" required>
+                                    <span class="input-suffix">%</span>
+                                </div>
+                                <div class="form-help">建议范围：1.50% - 3.50%</div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">生效日期</label>
+                            <div class="form-control-inline">
+                                <input type="date" class="form-input" id="cfg-ftpDate" required>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">备注说明</label>
+                            <div class="form-control-inline">
+                                <input type="text" class="form-input" id="cfg-ftpRemarks" placeholder="选填">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">保存配置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.resetFTP()">重置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.exportFTP()">导出 JSON</button>
+                        </div>
+                    </form>
+                    <div style="margin-top:28px;">
+                        <div class="card-title">历史配置记录</div>
+                        <table class="history-table">
+                            <thead><tr><th>生效日期</th><th>FTP 值</th><th>状态</th><th>备注</th><th>操作人</th><th>操作时间</th><th>操作</th></tr></thead>
+                            <tbody id="ftp-history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 调价参数配置面板 -->
+            <div class="config-panel" id="cfg-price">
+                <div class="card">
+                    <div class="alert-success" id="pa-cfg-success">保存成功！调价参数已更新</div>
+                    <div class="card-title">调价参数配置</div>
+                    <form id="priceAdjustForm" onsubmit="ConfigPanel.savePriceAdjust(event)">
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 业务成本</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-fxcb" step="0.01" min="0" required><span class="input-suffix">%</span></div>
+                                <div class="form-help">资金成本，建议范围：2.00% - 5.00%</div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 计提利润点</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-profitBp" step="1" min="0" required><span class="input-suffix">bp</span></div>
+                                <div class="form-help">1bp = 0.01%，建议范围：50bp - 200bp</div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 520客户兜底价格</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-bottomPrice520" step="0.01" min="0" required><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline"><span class="required">*</span> 非520客户兜底价格下限</label>
+                            <div class="form-control-inline">
+                                <div class="input-row"><input type="number" class="form-input" id="cfg-bottomPriceNon520Min" step="0.01" min="0" required><span class="input-suffix">%</span></div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">非520客户兜底价格</label>
+                            <div class="form-control-inline">
+                                <div style="padding:10px 14px;background:#fafaf6;border-radius:4px;color:var(--ink-mid);font-size:13px;">max(业务成本 + 风险成本, 非520客户兜底价格下限)</div>
+                                <div class="form-help">由系统自动计算</div>
+                            </div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">生效日期</label>
+                            <div class="form-control-inline"><input type="date" class="form-input" id="cfg-paDate" required></div>
+                        </div>
+                        <div class="form-row-inline">
+                            <label class="form-label-inline">备注说明</label>
+                            <div class="form-control-inline"><input type="text" class="form-input" id="cfg-paRemarks" placeholder="选填"></div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">保存配置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.resetPriceAdjust()">重置</button>
+                            <button type="button" class="btn btn-outline" onclick="ConfigPanel.exportPriceAdjust()">导出 JSON</button>
+                        </div>
+                    </form>
+                    <div style="margin-top:28px;">
+                        <div class="card-title">历史配置记录</div>
+                        <table class="history-table">
+                            <thead><tr><th>生效日期</th><th>业务成本</th><th>利润点</th><th>520兜底</th><th>非520下限</th><th>状态</th><th>备注</th><th>操作时间</th><th>操作</th></tr></thead>
+                            <tbody id="pa-history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ============================================================
+     打印导出区域（屏幕外，仅打印时可见）
+     ============================================================ -->
+<div id="print-area"></div>
+
+<script>
+/* ============================================================
+   模块 1：Auth — 登录、退出、角色判断
+   ============================================================ */
+const Auth = (() => {
+    /* 密码 → 角色映射 */
+    const CREDENTIALS = { 'admin123': 'admin', 'rm2024': 'rm' };
+
+    /** 执行登录 */
+    function login() {
+        const pwd = document.getElementById('loginPassword').value.trim();
+        const role = CREDENTIALS[pwd];
+        if (!role) {
+            _showError('密码错误，请重试');
+            _shakeCard();
+            return;
+        }
+        /* 写入本地登录态 */
+        const session = { role, loginTime: new Date().toISOString() };
+        localStorage.setItem('appSession', JSON.stringify(session));
+        /* 切换到主应用 */
+        UI.enterApp(session);
+    }
+
+    /** 退出登录 */
+    function logout() {
+        localStorage.removeItem('appSession');
+        location.reload();
+    }
+
+    /** 获取当前角色，无登录态返回 null */
+    function getRole() {
+        try {
+            return JSON.parse(localStorage.getItem('appSession'))?.role || null;
+        } catch { return null; }
+    }
+
+    /** 是否管理员 */
+    function isAdmin() { return getRole() === 'admin'; }
+
+    /** 获取完整会话 */
+    function getSession() {
+        try { return JSON.parse(localStorage.getItem('appSession')); }
+        catch { return null; }
+    }
+
+    /* —— 内部方法 —— */
+    function _showError(msg) {
+        const el = document.getElementById('loginError');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+    function _shakeCard() {
+        const card = document.getElementById('loginCard');
+        card.classList.add('shake');
+        setTimeout(() => card.classList.remove('shake'), 300);
+    }
+
+    return { login, logout, getRole, isAdmin, getSession };
+})();
+
+/* ============================================================
+   模块 2：Storage — localStorage 读写封装
+   ============================================================ */
+const Storage = (() => {
+    /* —— FTP 默认值 —— */
+    const DEFAULT_FTP = {
+        ftpValue: 2.13,
+        effectiveDate: '',
+        remarks: '',
+        operator: '系统默认',
+        operateTime: new Date().toISOString(),
+        status: 'active'
+    };
+
+    /* —— 调价参数默认值 —— */
+    const DEFAULT_PRICE_ADJUST = {
+        fxcb: 3.54,
+        profitBp: 101,
+        bottomPrice520: 4.55,
+        bottomPriceNon520Min: 4.55,
+        effectiveDate: '',
+        remarks: '',
+        operator: '系统默认',
+        operateTime: new Date().toISOString(),
+        status: 'active'
+    };
+
+    /** 通用读取 */
+    function get(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+        catch { return fallback; }
+    }
+
+    /** 通用写入 */
+    function set(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    /** 获取当前 FTP 配置（合并默认值） */
+    function getFTP() { return { ...DEFAULT_FTP, ...get('currentFTP', DEFAULT_FTP) }; }
+
+    /** 获取调价参数配置（合并默认值） */
+    function getPriceAdjustConfig() { return { ...DEFAULT_PRICE_ADJUST, ...get('priceAdjustConfig', DEFAULT_PRICE_ADJUST) }; }
+
+    /** 获取 FTP 历史 */
+    function getFTPHistory() { return get('ftpHistory', []); }
+
+    /** 获取调价参数历史 */
+    function getPriceAdjustHistory() { return get('priceAdjustHistory', []); }
+
+    return { get, set, getFTP, getPriceAdjustConfig, getFTPHistory, getPriceAdjustHistory, DEFAULT_FTP, DEFAULT_PRICE_ADJUST };
+})();
+
+/* ============================================================
+   模块 3：UI — 屏幕切换、导航、角色显隐、消息提示
+   ============================================================ */
+const UI = (() => {
+    /** 进入主应用（登录成功后调用） */
+    function enterApp(session) {
+        document.getElementById('screen-login').style.display = 'none';
+        const app = document.getElementById('screen-app');
+        app.style.display = '';  /* 清除内联 display:none，让 CSS 类接管 */
+        app.classList.add('visible');
+        updateRoleUI(session);
+        /* 初始化各模块数据 */
+        ToolMargin.loadFTP();
+        ConfigPanel.init();
+    }
+
+    /** 根据角色更新界面元素 */
+    function updateRoleUI(session) {
+        const role = session?.role || Auth.getRole();
+        const isAdmin = (role === 'admin');
+        /* 侧边栏角色信息 */
+        document.getElementById('sidebarRole').textContent = '角色：' + (isAdmin ? '管理员' : '客户经理');
+        if (session?.loginTime) {
+            const t = new Date(session.loginTime);
+            document.getElementById('sidebarTime').textContent = '登录：' + t.toLocaleString('zh-CN');
+        }
+        /* 管理员专属导航项 */
+        document.querySelectorAll('.nav-admin-only').forEach(el => {
+            el.style.display = isAdmin ? 'flex' : 'none';
+        });
+        /* FTP 输入框：管理员可编辑，客户经理只读 */
+        const ftpInputs = [document.getElementById('margin-ftpA'), document.getElementById('margin-ftpB')];
+        ftpInputs.forEach(inp => { if (inp) inp.disabled = !isAdmin; });
+    }
+
+    /** 切换内容页 */
+    function switchPage(pageId, navEl) {
+        /* 权限拦截：非管理员不能访问配置页 */
+        if (pageId === 'page-config' && !Auth.isAdmin()) return;
+        /* 切换导航激活态 */
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if (navEl) navEl.classList.add('active');
+        /* 切换内容页 */
+        document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+        const page = document.getElementById(pageId);
+        if (page) page.classList.add('active');
+    }
+
+    /** 显示消息提示 */
+    function showAlert(id, duration) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), duration || 3000);
+    }
+
+    return { enterApp, updateRoleUI, switchPage, showAlert };
+})();
+
+/* ============================================================
+   模块 4：ToolMargin — 承兑保证金比例计算器
+   公式完全冻结，与原始页面一致
+   ============================================================ */
+const ToolMargin = (() => {
+    /** 加载 FTP 值到输入框 */
+    function loadFTP() {
+        const cfg = Storage.getFTP();
+        const val = cfg.ftpValue;
+        document.getElementById('margin-ftpA').value = Number(val).toFixed(2);
+        document.getElementById('margin-ftpB').value = Number(val).toFixed(2);
+    }
+
+    /** 切换计算模式 */
+    function switchMode(mode, tabEl) {
+        /* 切换 Tab 激活态 */
+        tabEl.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        tabEl.classList.add('active');
+        /* 切换表单区域 */
+        document.getElementById('margin-modeA').style.display = (mode === 'modeA') ? 'block' : 'none';
+        document.getElementById('margin-modeB').style.display = (mode === 'modeB') ? 'block' : 'none';
+        /* 隐藏结果 */
+        _hideResult();
+    }
+
+    /**
+     * 模式 A：价格 → 保证金比例
+     * 公式冻结：Math.ceil(ratio * 100) / 100
+     */
+    function calcModeA() {
+        const ftp = parseFloat(document.getElementById('margin-ftpA').value);
+        const targetPrice = parseFloat(document.getElementById('margin-targetPrice').value);
+        if (isNaN(ftp) || ftp <= 0) { alert('请输入有效的FTP值'); return; }
+        if (isNaN(targetPrice) || targetPrice <= 0) { alert('请输入有效的目标价格'); return; }
+        if (targetPrice <= ftp) { alert('目标价格必须大于FTP'); return; }
+
+        /* —— 冻结公式：与原始页面完全一致 —— */
+        const priceDiff = targetPrice - ftp;
+        const ratio = priceDiff / targetPrice;
+        const marginRatio = Math.ceil(ratio * 100) / 100;
+        /* 展示：整数百分比 */
+        _showResult('0手续费保证金比例', (marginRatio * 100).toFixed(0) + '%');
+    }
+
+    /**
+     * 模式 B：保证金比例 → 价格
+     * 公式冻结：Math.floor(basePrice * 100) / 100
+     */
+    function calcModeB() {
+        const ftp = parseFloat(document.getElementById('margin-ftpB').value);
+        const targetRatioPercent = parseFloat(document.getElementById('margin-targetRatio').value);
+        if (isNaN(ftp) || ftp <= 0) { alert('请输入有效的FTP值'); return; }
+        if (isNaN(targetRatioPercent) || targetRatioPercent <= 0 || targetRatioPercent >= 100) {
+            alert('请输入有效的保证金比例（0-100之间）'); return;
+        }
+
+        /* —— 冻结公式：与原始页面完全一致 —— */
+        const targetRatio = targetRatioPercent / 100;
+        const basePrice = (ftp * targetRatio) / (1 - targetRatio);
+        const roundedBase = Math.floor(basePrice * 100) / 100;
+        const minPrice = roundedBase + ftp;
+        /* 展示：两位小数 */
+        _showResult('对应最低价格', minPrice.toFixed(2) + '%');
+    }
+
+    /* —— 内部方法 —— */
+    function _showResult(label, value) {
+        document.getElementById('margin-empty').style.display = 'none';
+        const rd = document.getElementById('margin-result');
+        rd.classList.add('show');
+        document.getElementById('margin-result-label').textContent = label;
+        document.getElementById('margin-result-value').textContent = value;
+    }
+    function _hideResult() {
+        document.getElementById('margin-empty').style.display = 'block';
+        document.getElementById('margin-result').classList.remove('show');
+    }
+
+    return { loadFTP, switchMode, calcModeA, calcModeB };
+})();
+
+/* ============================================================
+   模块 5：ToolPriceAdjust — 一户一策调价计算器
+   公式、校验、图表数据生成逻辑完全冻结
+   ============================================================ */
+const ToolPriceAdjust = (() => {
+    let customerType = 'Y';       // 当前选中的客户类型
+    let lastCalcResult = null;    // 最近一次有效计算结果（供导出使用）
+
+    /** 切换客户类型 */
+    function selectType(type) {
+        customerType = type;
+        document.getElementById('pa-typeY').classList.toggle('active', type === 'Y');
+        document.getElementById('pa-typeN').classList.toggle('active', type === 'N');
+    }
+
+    /** 获取最近计算结果（供 Export 模块使用） */
+    function getLastResult() { return lastCalcResult; }
+
+    /**
+     * 执行计算 — 公式与原始页面完全一致
+     */
+    function calculate() {
+        const config = Storage.getPriceAdjustConfig();
+        const currentPrice   = parseFloat(document.getElementById('pa-currentPrice').value);
+        const riskCost        = parseFloat(document.getElementById('pa-riskCost').value);
+        const avgBalance      = parseFloat(document.getElementById('pa-avgBalance').value);
+        const targetPrice     = parseFloat(document.getElementById('pa-targetPrice').value);
+        const availableLimit  = parseFloat(document.getElementById('pa-availableLimit').value);
+        const expectedDays    = parseFloat(document.getElementById('pa-expectedDays').value);
+
+        /* 隐藏警告 */
+        document.getElementById('pa-warning').classList.remove('show');
+
+        /* —— 校验：所有输入项必填 —— */
+        if (isNaN(currentPrice) || isNaN(riskCost) || isNaN(avgBalance) ||
+            isNaN(targetPrice) || isNaN(availableLimit) || isNaN(expectedDays)) {
+            _warn('请填写所有必填项'); return;
+        }
+
+        /* —— 计算兜底价格（冻结逻辑） —— */
+        let bottomPrice;
+        if (customerType === 'Y') {
+            /* 520客户：固定兜底价格 */
+            bottomPrice = config.bottomPrice520;
+        } else {
+            /* 非520客户：max(业务成本 + 风险成本, 非520客户兜底价格下限) */
+            bottomPrice = Math.max(config.fxcb + riskCost, config.bottomPriceNon520Min || 4.55);
+        }
+
+        /* —— 校验：当前价格必须大于兜底价格 —— */
+        if (currentPrice <= bottomPrice) {
+            _warn('当前价格必须大于兜底价格 (' + bottomPrice.toFixed(2) + '%)');
+            return;
+        }
+
+        /* —— 校验：目标价格低于兜底价格 → 特殊展示 —— */
+        if (targetPrice <= bottomPrice) {
+            _warn('目标价格低于兜底价格 (' + bottomPrice.toFixed(2) + '%)');
+            _showSpecialResult(bottomPrice);
+            lastCalcResult = null;
+            document.getElementById('exportPdfBtn').style.display = 'none';
+            return;
+        }
+
+        /* —— 冻结公式：三个核心计算结果 —— */
+        const targetBalance3Month = (currentPrice - bottomPrice) * avgBalance / (targetPrice - bottomPrice);
+        const dailyIncreaseBalance = targetBalance3Month - avgBalance;
+        const targetBalanceByDays = (90 / expectedDays) * targetBalance3Month;
+
+        /* —— 展示结果 —— */
+        document.getElementById('pa-empty').style.display = 'none';
+        const rd = document.getElementById('pa-result');
+        rd.classList.add('show');
+
+        document.getElementById('pa-val1').textContent = targetBalance3Month.toFixed(2);
+        document.getElementById('pa-val1').style.fontSize = '56px';
+        document.getElementById('pa-val2').textContent = (dailyIncreaseBalance >= 0 ? '+' : '') + dailyIncreaseBalance.toFixed(2) + ' 万元';
+        document.getElementById('pa-val3').textContent = targetBalanceByDays.toFixed(2) + ' 万元';
+        document.getElementById('pa-detailType').textContent = (customerType === 'Y' ? '520客户' : '非520客户');
+        document.getElementById('pa-detailCurrent').textContent = currentPrice.toFixed(2) + '%';
+        document.getElementById('pa-detailTarget').textContent = targetPrice.toFixed(2) + '%';
+        document.getElementById('pa-detailBottom').textContent = bottomPrice.toFixed(2) + '%';
+
+        /* 绘制图表 */
+        _drawChart(currentPrice, bottomPrice, avgBalance, targetPrice, targetBalance3Month);
+
+        /* 保存计算结果供导出 */
+        lastCalcResult = {
+            customerType, currentPrice, riskCost, avgBalance,
+            targetPrice, availableLimit, expectedDays, bottomPrice,
+            targetBalance3Month, dailyIncreaseBalance, targetBalanceByDays
+        };
+        /* 显示导出按钮 */
+        document.getElementById('exportPdfBtn').style.display = 'inline-block';
+    }
+
+    /* —— 目标价格过低时的特殊展示 —— */
+    function _showSpecialResult(bottomPrice) {
+        document.getElementById('pa-empty').style.display = 'none';
+        const rd = document.getElementById('pa-result');
+        rd.classList.add('show');
+        document.getElementById('pa-val1').textContent = '价格过低请调整或升级审批';
+        document.getElementById('pa-val1').style.fontSize = '24px';
+        document.getElementById('pa-val2').textContent = '-';
+        document.getElementById('pa-val3').textContent = '-';
+        document.getElementById('pa-detailType').textContent = (customerType === 'Y' ? '520客户' : '非520客户');
+        document.getElementById('pa-detailCurrent').textContent = parseFloat(document.getElementById('pa-currentPrice').value).toFixed(2) + '%';
+        document.getElementById('pa-detailTarget').textContent = parseFloat(document.getElementById('pa-targetPrice').value).toFixed(2) + '%';
+        document.getElementById('pa-detailBottom').textContent = bottomPrice.toFixed(2) + '%';
+        /* 清空图表 */
+        const canvas = document.getElementById('pa-chart');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    /** 显示警告 */
+    function _warn(msg) {
+        const el = document.getElementById('pa-warning');
+        el.textContent = msg;
+        el.classList.add('show');
+    }
+
+    /**
+     * 绘制价格-余额曲线图
+     * 数据点生成逻辑与原始页面完全一致
+     */
+    function _drawChart(currentPrice, bottomPrice, avgBalance, targetPrice, targetBalance) {
+        const canvas = document.getElementById('pa-chart');
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        /* devicePixelRatio 缩放 */
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        const width = rect.width, height = rect.height;
+        ctx.clearRect(0, 0, width, height);
+
+        /* —— 数据点生成（冻结逻辑） —— */
+        const data = [];
+        const startPrice = bottomPrice + 0.01;
+        const endPrice = Math.max(currentPrice + 2, targetPrice + 2);
+        for (let price = startPrice; price <= endPrice; price += 0.05) {
+            const balance = (currentPrice - bottomPrice) * avgBalance / (price - bottomPrice);
+            if (balance > 0 && balance < 5000) data.push({ price, balance });
+        }
+        if (data.length === 0) return;
+
+        const minPrice = Math.min(...data.map(d => d.price));
+        const maxPrice = Math.max(...data.map(d => d.price));
+        const minBalance = 0;
+        const maxBalance = Math.max(...data.map(d => d.balance)) * 1.15;
+
+        const padding = 60;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        const xScale = (p) => padding + (p - minPrice) / (maxPrice - minPrice) * chartWidth;
+        const yScale = (b) => height - padding - (b - minBalance) / (maxBalance - minBalance) * chartHeight;
+
+        /* 5×5 网格线 — 使用 --border 色 */
+        ctx.strokeStyle = '#E8E4DC'; ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+            const y = padding + (chartHeight / 5) * i;
+            ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(width - padding, y); ctx.stroke();
+        }
+        for (let i = 0; i <= 5; i++) {
+            const x = padding + (chartWidth / 5) * i;
+            ctx.beginPath(); ctx.moveTo(x, padding); ctx.lineTo(x, height - padding); ctx.stroke();
+        }
+
+        /* 坐标轴 */
+        ctx.strokeStyle = '#1A1A2E'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(padding, padding); ctx.lineTo(padding, height - padding);
+        ctx.lineTo(width - padding, height - padding); ctx.stroke();
+
+        /* Y 轴标签（余额） */
+        ctx.font = '11px sans-serif'; ctx.fillStyle = '#4A4A6A'; ctx.textAlign = 'right';
+        for (let i = 0; i <= 5; i++) {
+            const balance = minBalance + (maxBalance - minBalance) * (5 - i) / 5;
+            const y = padding + (chartHeight / 5) * i;
+            ctx.fillText(balance.toFixed(0), padding - 8, y + 4);
+        }
+
+        /* X 轴标签（价格） */
+        ctx.textAlign = 'center';
+        for (let i = 0; i <= 5; i++) {
+            const price = minPrice + (maxPrice - minPrice) * i / 5;
+            const x = padding + (chartWidth / 5) * i;
+            ctx.fillText(price.toFixed(2), x, height - padding + 20);
+        }
+
+        /* 曲线 — 使用 --chart-curve 色 */
+        ctx.strokeStyle = '#2C5F8A'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        data.forEach((point, index) => {
+            const x = xScale(point.price), y = yScale(point.balance);
+            index === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        /* 当前状态点 — --success 色 */
+        ctx.fillStyle = '#2D7D46';
+        ctx.beginPath(); ctx.arc(xScale(currentPrice), yScale(avgBalance), 6, 0, Math.PI * 2); ctx.fill();
+
+        /* 目标状态点 — --danger 色 */
+        ctx.fillStyle = '#C0392B';
+        ctx.beginPath(); ctx.arc(xScale(targetPrice), yScale(targetBalance), 6, 0, Math.PI * 2); ctx.fill();
+
+        /* 数据标签 */
+        ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#2D7D46';
+        ctx.fillText(avgBalance.toFixed(0), xScale(currentPrice), yScale(avgBalance) - 12);
+        ctx.fillStyle = '#C0392B';
+        ctx.fillText(targetBalance.toFixed(0), xScale(targetPrice), yScale(targetBalance) - 12);
+
+        /* 轴标题 */
+        ctx.fillStyle = '#4A4A6A'; ctx.font = '12px sans-serif';
+        ctx.fillText('价格 (%)', width / 2, height - 10);
+        ctx.save(); ctx.translate(20, height / 2); ctx.rotate(-Math.PI / 2);
+        ctx.fillText('余额 (万元)', 0, 0); ctx.restore();
+
+        /* 右上角图例 */
+        ctx.fillStyle = '#2D7D46'; ctx.textAlign = 'left';
+        ctx.beginPath(); ctx.arc(width - 120, 30, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillText('当前状态', width - 110, 34);
+        ctx.fillStyle = '#C0392B';
+        ctx.beginPath(); ctx.arc(width - 120, 50, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillText('目标状态', width - 110, 54);
+    }
+
+    return { selectType, calculate, getLastResult };
+})();
+
+/* ============================================================
+   模块 6：ConfigPanel — FTP 配置、调价参数配置、历史记录
+   仅管理员可操作，保存动作有权限保护
+   ============================================================ */
+const ConfigPanel = (() => {
+    /** 初始化配置面板（加载当前值 + 历史） */
+    function init() {
+        _loadFTPForm();
+        _loadFTPHistory();
+        _loadPAForm();
+        _loadPAHistory();
+    }
+
+    /** 切换配置子 Tab */
+    function switchTab(panelId, tabEl) {
+        tabEl.parentElement.querySelectorAll('.config-tab').forEach(t => t.classList.remove('active'));
+        tabEl.classList.add('active');
+        document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==================== FTP 配置 ==================== */
+
+    /** 保存 FTP 配置 */
+    function saveFTP(e) {
+        e.preventDefault();
+        /* 权限保护 */
+        if (!Auth.isAdmin()) { alert('仅管理员可修改配置'); return; }
+
+        const ftpValue = parseFloat(document.getElementById('cfg-ftpValue').value);
+        const effectiveDate = document.getElementById('cfg-ftpDate').value;
+        const remarks = document.getElementById('cfg-ftpRemarks').value;
+
+        if (isNaN(ftpValue) || ftpValue <= 0) { alert('请输入有效的FTP值'); return; }
+        if (ftpValue < 0.5 || ftpValue > 10) { alert('FTP值超出合理范围（0.5% - 10%）'); return; }
+        if (!effectiveDate) { alert('请选择生效日期'); return; }
+
+        const config = {
+            ftpValue, effectiveDate, remarks,
+            operator: '管理员',
+            operateTime: new Date().toISOString(),
+            status: 'active'
+        };
+        Storage.set('currentFTP', config);
+
+        /* 更新历史记录 */
+        let history = Storage.getFTPHistory();
+        history = history.map(item => ({ ...item, status: 'inactive' }));
+        history.unshift(config);
+        Storage.set('ftpHistory', history);
+
+        UI.showAlert('ftp-success');
+        _loadFTPHistory();
+        /* 同步更新计算器中的 FTP 值 */
+        ToolMargin.loadFTP();
+    }
+
+    /** 重置 FTP 表单 */
+    function resetFTP() {
+        _loadFTPForm();
+    }
+
+    /** 导出 FTP 配置为 JSON */
+    function exportFTP() {
+        const config = Storage.getFTP();
+        _downloadJSON(config, 'FTP配置_' + (config.effectiveDate || 'default') + '.json');
+    }
+
+    /* ==================== 调价参数配置 ==================== */
+
+    /** 保存调价参数 */
+    function savePriceAdjust(e) {
+        e.preventDefault();
+        if (!Auth.isAdmin()) { alert('仅管理员可修改配置'); return; }
+
+        const fxcb = parseFloat(document.getElementById('cfg-fxcb').value);
+        const profitBp = parseFloat(document.getElementById('cfg-profitBp').value);
+        const bottomPrice520 = parseFloat(document.getElementById('cfg-bottomPrice520').value);
+        const bottomPriceNon520Min = parseFloat(document.getElementById('cfg-bottomPriceNon520Min').value);
+        const effectiveDate = document.getElementById('cfg-paDate').value;
+        const remarks = document.getElementById('cfg-paRemarks').value;
+
+        if (isNaN(fxcb) || fxcb <= 0) { alert('请输入有效的业务成本'); return; }
+        if (isNaN(profitBp) || profitBp <= 0) { alert('请输入有效的计提利润点'); return; }
+        if (isNaN(bottomPrice520) || bottomPrice520 <= 0) { alert('请输入有效的520客户兜底价格'); return; }
+        if (isNaN(bottomPriceNon520Min) || bottomPriceNon520Min <= 0) { alert('请输入有效的非520客户兜底价格下限'); return; }
+        if (!effectiveDate) { alert('请选择生效日期'); return; }
+
+        const config = {
+            fxcb, profitBp, bottomPrice520, bottomPriceNon520Min,
+            effectiveDate, remarks,
+            operator: '管理员',
+            operateTime: new Date().toISOString(),
+            status: 'active'
+        };
+        Storage.set('priceAdjustConfig', config);
+
+        let history = Storage.getPriceAdjustHistory();
+        history = history.map(item => ({ ...item, status: 'inactive' }));
+        history.unshift(config);
+        Storage.set('priceAdjustHistory', history);
+
+        UI.showAlert('pa-cfg-success');
+        _loadPAHistory();
+    }
+
+    /** 重置调价参数表单 */
+    function resetPriceAdjust() {
+        _loadPAForm();
+    }
+
+    /** 导出调价参数为 JSON */
+    function exportPriceAdjust() {
+        const config = Storage.getPriceAdjustConfig();
+        _downloadJSON(config, '调价参数配置_' + (config.effectiveDate || 'default') + '.json');
+    }
+
+    /* ==================== 内部方法 ==================== */
+
+    /** 加载 FTP 表单当前值 */
+    function _loadFTPForm() {
+        const cfg = Storage.getFTP();
+        document.getElementById('cfg-ftpValue').value = cfg.ftpValue;
+        document.getElementById('cfg-ftpDate').value = cfg.effectiveDate || new Date().toISOString().split('T')[0];
+        document.getElementById('cfg-ftpRemarks').value = cfg.remarks || '';
+    }
+
+    /** 渲染 FTP 历史记录表格 */
+    function _loadFTPHistory() {
+        const history = Storage.getFTPHistory();
+        const tbody = document.getElementById('ftp-history-body');
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-light);">暂无历史记录</td></tr>';
+            return;
+        }
+        tbody.innerHTML = history.map((item, i) => `
+            <tr>
+                <td>${item.effectiveDate || '-'}</td>
+                <td><strong>${Number(item.ftpValue).toFixed(2)}%</strong></td>
+                <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '当前生效' : '已失效'}</span></td>
+                <td>${item.remarks || '-'}</td>
+                <td>${item.operator || '-'}</td>
+                <td>${_fmtTime(item.operateTime)}</td>
+                <td>
+                    <span class="action-link" onclick="ConfigPanel._applyFTPHistory(${i})">应用</span>
+                    <span class="action-link" onclick="ConfigPanel._deleteFTPHistory(${i})">删除</span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    /** 加载调价参数表单当前值 */
+    function _loadPAForm() {
+        const cfg = Storage.getPriceAdjustConfig();
+        document.getElementById('cfg-fxcb').value = cfg.fxcb;
+        document.getElementById('cfg-profitBp').value = cfg.profitBp;
+        document.getElementById('cfg-bottomPrice520').value = cfg.bottomPrice520;
+        document.getElementById('cfg-bottomPriceNon520Min').value = cfg.bottomPriceNon520Min;
+        document.getElementById('cfg-paDate').value = cfg.effectiveDate || new Date().toISOString().split('T')[0];
+        document.getElementById('cfg-paRemarks').value = cfg.remarks || '';
+    }
+
+    /** 渲染调价参数历史记录表格 */
+    function _loadPAHistory() {
+        const history = Storage.getPriceAdjustHistory();
+        const tbody = document.getElementById('pa-history-body');
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--ink-light);">暂无历史记录</td></tr>';
+            return;
+        }
+        tbody.innerHTML = history.map((item, i) => `
+            <tr>
+                <td>${item.effectiveDate || '-'}</td>
+                <td><strong>${Number(item.fxcb).toFixed(2)}%</strong></td>
+                <td><strong>${item.profitBp}bp</strong></td>
+                <td><strong>${Number(item.bottomPrice520).toFixed(2)}%</strong></td>
+                <td><strong>${Number(item.bottomPriceNon520Min).toFixed(2)}%</strong></td>
+                <td><span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">${item.status === 'active' ? '当前生效' : '已失效'}</span></td>
+                <td>${item.remarks || '-'}</td>
+                <td>${_fmtTime(item.operateTime)}</td>
+                <td>
+                    <span class="action-link" onclick="ConfigPanel._applyPAHistory(${i})">应用</span>
+                    <span class="action-link" onclick="ConfigPanel._deletePAHistory(${i})">删除</span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    /* 应用 / 删除历史记录（需要暴露到模块外供 onclick 调用） */
+    function _applyFTPHistory(index) {
+        const history = Storage.getFTPHistory();
+        const cfg = history[index];
+        document.getElementById('cfg-ftpValue').value = cfg.ftpValue;
+        document.getElementById('cfg-ftpDate').value = cfg.effectiveDate;
+        document.getElementById('cfg-ftpRemarks').value = cfg.remarks || '';
+    }
+    function _deleteFTPHistory(index) {
+        if (!confirm('确定要删除这条历史记录吗？')) return;
+        let history = Storage.getFTPHistory();
+        history.splice(index, 1);
+        Storage.set('ftpHistory', history);
+        _loadFTPHistory();
+    }
+    function _applyPAHistory(index) {
+        const history = Storage.getPriceAdjustHistory();
+        const cfg = history[index];
+        document.getElementById('cfg-fxcb').value = cfg.fxcb;
+        document.getElementById('cfg-profitBp').value = cfg.profitBp;
+        document.getElementById('cfg-bottomPrice520').value = cfg.bottomPrice520 || 4.55;
+        document.getElementById('cfg-bottomPriceNon520Min').value = cfg.bottomPriceNon520Min || 4.55;
+        document.getElementById('cfg-paDate').value = cfg.effectiveDate;
+        document.getElementById('cfg-paRemarks').value = cfg.remarks || '';
+    }
+    function _deletePAHistory(index) {
+        if (!confirm('确定要删除这条历史记录吗？')) return;
+        let history = Storage.getPriceAdjustHistory();
+        history.splice(index, 1);
+        Storage.set('priceAdjustHistory', history);
+        _loadPAHistory();
+    }
+
+    /** 格式化时间 */
+    function _fmtTime(isoStr) {
+        if (!isoStr) return '-';
+        return new Date(isoStr).toLocaleString('zh-CN', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    /** 下载 JSON 文件 */
+    function _downloadJSON(data, filename) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    return {
+        init, switchTab,
+        saveFTP, resetFTP, exportFTP,
+        savePriceAdjust, resetPriceAdjust, exportPriceAdjust,
+        /* 暴露给 onclick 的内部方法 */
+        _applyFTPHistory, _deleteFTPHistory,
+        _applyPAHistory, _deletePAHistory
+    };
+})();
+
+/* ============================================================
+   模块 7：Export — 打印导出 PDF
+   将输入参数、计算结果和图表写入 #print-area，调用 window.print()
+   ============================================================ */
+const Export = (() => {
+    /**
+     * 一键导出 PDF（通过浏览器打印）
+     * 触发条件：调价计算器已有完整计算结果
+     */
+    function printPDF() {
+        const result = ToolPriceAdjust.getLastResult();
+        if (!result) { alert('请先完成一次有效计算'); return; }
+
+        /* 将 Canvas 转为图片 */
+        const canvas = document.getElementById('pa-chart');
+        let chartImg = '';
+        try { chartImg = canvas.toDataURL('image/png'); } catch (e) { /* 忽略 */ }
+
+        const now = new Date().toLocaleString('zh-CN');
+        const role = Auth.isAdmin() ? '管理员' : '客户经理';
+
+        /* 构建打印区域 HTML */
+        const html = `
+            <div class="print-title">一户一策调价计算报告</div>
+            <div class="print-time">导出时间：${now}　　操作角色：${role}</div>
+            <div class="print-section">
+                <div class="print-section-title">输入参数</div>
+                <div class="print-grid">
+                    <div class="print-item"><span class="print-item-label">客户类型：</span><span class="print-item-value">${result.customerType === 'Y' ? '520客户' : '非520客户'}</span></div>
+                    <div class="print-item"><span class="print-item-label">当前价格：</span><span class="print-item-value">${result.currentPrice.toFixed(2)}%</span></div>
+                    <div class="print-item"><span class="print-item-label">当前风险成本：</span><span class="print-item-value">${result.riskCost.toFixed(2)}%</span></div>
+                    <div class="print-item"><span class="print-item-label">近3个月长周期余额：</span><span class="print-item-value">${result.avgBalance.toFixed(2)} 万元</span></div>
+                    <div class="print-item"><span class="print-item-label">目标价格：</span><span class="print-item-value">${result.targetPrice.toFixed(2)}%</span></div>
+                    <div class="print-item"><span class="print-item-label">当前可用额度：</span><span class="print-item-value">${result.availableLimit.toFixed(2)} 万元</span></div>
+                    <div class="print-item"><span class="print-item-label">预计用款天数：</span><span class="print-item-value">${result.expectedDays} 天</span></div>
+                    <div class="print-item"><span class="print-item-label">兜底价格：</span><span class="print-item-value">${result.bottomPrice.toFixed(2)}%</span></div>
+                </div>
+            </div>
+            <div class="print-section">
+                <div class="print-section-title">计算结果</div>
+                <div class="print-results">
+                    <div class="print-result-box">
+                        <div class="print-result-label">对应3个月长周期目标余额</div>
+                        <div class="print-result-value">${result.targetBalance3Month.toFixed(2)} 万元</div>
+                    </div>
+                    <div class="print-result-box">
+                        <div class="print-result-label">日均需提额余额</div>
+                        <div class="print-result-value">${(result.dailyIncreaseBalance >= 0 ? '+' : '') + result.dailyIncreaseBalance.toFixed(2)} 万元</div>
+                    </div>
+                    <div class="print-result-box">
+                        <div class="print-result-label">对应用款天数目标余额</div>
+                        <div class="print-result-value">${result.targetBalanceByDays.toFixed(2)} 万元</div>
+                    </div>
+                </div>
+            </div>
+            ${chartImg ? `
+            <div class="print-section">
+                <div class="print-section-title">价格-余额曲线图</div>
+                <div class="print-chart"><img src="${chartImg}" alt="曲线图"></div>
+            </div>` : ''}
+            <div class="print-footer">本报告由一户一策业务工具台生成，仅供内部参考</div>
+        `;
+        document.getElementById('print-area').innerHTML = html;
+        /* 延迟调用打印，确保 DOM 渲染完成 */
+        setTimeout(() => window.print(), 200);
+    }
+
+    return { printPDF };
+})();
+
+/* ============================================================
+   模块 8：Bootstrap — 页面初始化、默认配置加载、事件绑定
+   ============================================================ */
+const Bootstrap = (() => {
+    function init() {
+        /* 检查是否已有登录态 */
+        const session = Auth.getSession();
+        if (session && session.role) {
+            /* 已登录，直接进入主应用 */
+            UI.enterApp(session);
+        }
+        /* 否则停留在登录页 */
+
+        /* 绑定回车键登录 */
+        document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') Auth.login();
+        });
+    }
+
+    return { init };
+})();
+
+/* 页面加载完成后启动 */
+document.addEventListener('DOMContentLoaded', Bootstrap.init);
+</script>
+</body>
+</html>

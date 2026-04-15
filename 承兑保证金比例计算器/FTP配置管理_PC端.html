@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTP配置管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "Segoe UI", Tahoma, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8e8e8;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            width: 150px;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-label .required {
+            color: #ff4d4f;
+            margin-right: 4px;
+        }
+
+        .form-control {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-input:hover {
+            border-color: #40a9ff;
+        }
+
+        .form-input:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .input-suffix {
+            margin-left: 8px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .form-help {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #999;
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-primary:active {
+            background: #096dd9;
+        }
+
+        .btn-default {
+            background: white;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-default:hover {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        .history-section {
+            margin-top: 32px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .history-table th {
+            background: #fafafa;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .history-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .history-table tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-active {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .status-inactive {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .action-link {
+            color: #1890ff;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .action-link:hover {
+            color: #40a9ff;
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+
+        .alert-error {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">FTP配置管理</div>
+        </div>
+
+        <div class="content-card">
+            <div class="alert alert-success" id="successAlert">
+                <strong>✓ 保存成功！</strong> FTP配置已更新
+            </div>
+
+            <div class="alert alert-error" id="errorAlert">
+                <strong>✗ 保存失败！</strong> <span id="errorMessage"></span>
+            </div>
+
+            <div class="section-title">FTP配置</div>
+
+            <form id="ftpForm">
+                <div class="form-row">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        应用FTP值
+                    </label>
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input type="number" class="form-input" id="ftpValue"
+                                   placeholder="请输入FTP值" step="0.01" min="0" max="10" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                        <div class="form-help">
+                            建议范围：1.50% - 3.50%，当前市场FTP通常在2.00% - 2.50%之间
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">生效日期</label>
+                    <div class="form-control">
+                        <input type="date" class="form-input" id="effectiveDate" required>
+                        <div class="form-help">
+                            FTP配置的生效日期，默认为当前日期
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">备注说明</label>
+                    <div class="form-control">
+                        <input type="text" class="form-input" id="remarks"
+                               placeholder="选填：如调整原因、市场背景等">
+                        <div class="form-help">
+                            可选填写本次FTP调整的原因或说明
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">保存配置</button>
+                    <button type="button" class="btn btn-default" onclick="resetForm()">重置</button>
+                    <button type="button" class="btn btn-default" onclick="exportConfig()">导出配置</button>
+                </div>
+            </form>
+
+            <div class="history-section">
+                <div class="section-title">历史配置记录</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>生效日期</th>
+                            <th>应用FTP值</th>
+                            <th>状态</th>
+                            <th>备注</th>
+                            <th>操作人</th>
+                            <th>操作时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- 历史记录将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认日期为今天
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('effectiveDate').value = today;
+
+            // 加载当前FTP配置
+            loadCurrentFTP();
+
+            // 加载历史记录
+            loadHistory();
+        });
+
+        // 表单提交
+        document.getElementById('ftpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveFTP();
+        });
+
+        // 保存FTP配置
+        function saveFTP() {
+            const ftpValue = parseFloat(document.getElementById('ftpValue').value);
+            const effectiveDate = document.getElementById('effectiveDate').value;
+            const remarks = document.getElementById('remarks').value;
+
+            // 验证
+            if (isNaN(ftpValue) || ftpValue <= 0) {
+                showError('请输入有效的FTP值');
+                return;
+            }
+
+            if (ftpValue < 0.5 || ftpValue > 10) {
+                showError('FTP值超出合理范围（0.5% - 10%）');
+                return;
+            }
+
+            if (!effectiveDate) {
+                showError('请选择生效日期');
+                return;
+            }
+
+            // 构建配置对象
+            const config = {
+                ftpValue: ftpValue,
+                effectiveDate: effectiveDate,
+                remarks: remarks,
+                operator: '当前用户', // 实际应用中应从登录信息获取
+                operateTime: new Date().toISOString(),
+                status: 'active'
+            };
+
+            // 保存到localStorage
+            localStorage.setItem('currentFTP', JSON.stringify(config));
+
+            // 添加到历史记录
+            let history = JSON.parse(localStorage.getItem('ftpHistory') || '[]');
+
+            // 将之前的活动记录设为非活动
+            history = history.map(item => ({...item, status: 'inactive'}));
+
+            // 添加新记录
+            history.unshift(config);
+            localStorage.setItem('ftpHistory', JSON.stringify(history));
+
+            // 显示成功消息
+            showSuccess();
+
+            // 刷新历史记录
+            loadHistory();
+        }
+
+        // 加载当前FTP配置
+        function loadCurrentFTP() {
+            const config = JSON.parse(localStorage.getItem('currentFTP') || 'null');
+            if (config) {
+                document.getElementById('ftpValue').value = config.ftpValue;
+                document.getElementById('effectiveDate').value = config.effectiveDate;
+                document.getElementById('remarks').value = config.remarks || '';
+            } else {
+                // 设置默认值
+                document.getElementById('ftpValue').value = '2.13';
+            }
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('ftpHistory') || '[]');
+            const tbody = document.getElementById('historyTableBody');
+
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">暂无历史记录</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map((item, index) => `
+                <tr>
+                    <td>${item.effectiveDate}</td>
+                    <td><strong>${item.ftpValue.toFixed(2)}%</strong></td>
+                    <td>
+                        <span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${item.status === 'active' ? '当前生效' : '已失效'}
+                        </span>
+                    </td>
+                    <td>${item.remarks || '-'}</td>
+                    <td>${item.operator}</td>
+                    <td>${formatDateTime(item.operateTime)}</td>
+                    <td>
+                        <span class="action-link" onclick="applyHistory(${index})">应用</span>
+                        <span class="action-link" onclick="deleteHistory(${index})">删除</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 应用历史配置
+        function applyHistory(index) {
+            const history = JSON.parse(localStorage.getItem('ftpHistory') || '[]');
+            const config = history[index];
+
+            document.getElementById('ftpValue').value = config.ftpValue;
+            document.getElementById('effectiveDate').value = config.effectiveDate;
+            document.getElementById('remarks').value = config.remarks || '';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 删除历史记录
+        function deleteHistory(index) {
+            if (!confirm('确定要删除这条历史记录吗？')) {
+                return;
+            }
+
+            let history = JSON.parse(localStorage.getItem('ftpHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('ftpHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('ftpForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('effectiveDate').value = today;
+            loadCurrentFTP();
+        }
+
+        // 导出配置
+        function exportConfig() {
+            const config = JSON.parse(localStorage.getItem('currentFTP') || 'null');
+            if (!config) {
+                alert('暂无配置可导出');
+                return;
+            }
+
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `FTP配置_${config.effectiveDate}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 显示成功消息
+        function showSuccess() {
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('show');
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            const alert = document.getElementById('errorAlert');
+            document.getElementById('errorMessage').textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+
+        // 格式化日期时间
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 获取当前FTP值（供其他页面调用）
+        function getCurrentFTP() {
+            const config = JSON.parse(localStorage.getItem('currentFTP') || 'null');
+            return config ? config.ftpValue : 2.13; // 默认值
+        }
+
+        // 导出函数供外部使用
+        window.getCurrentFTP = getCurrentFTP;
+    </script>
+</body>
+</html>
